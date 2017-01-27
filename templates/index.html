@@ -1,69 +1,13 @@
-<!DOCTYPE html>
-<html = lang="en">
-<head>
-	<title>Home</title>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-
-<style>
-
-nav {
-  padding: 0px;
-  position: fixed;
-  width: 100%;
-  background: #5cc3e6; 
-  top: 0;
-  left: 0;
-}
-
-.left-side {
-  float: left;
-  padding: 20px;
-  text-transform: uppercase;
-  font-family: 'Fjalla One', sans-serif;
-  color: #FFF;
-  letter-spacing: 2px;
-}
-
-.right-side {
-  float: right;
-}
-
-.right-side li {
-  display: inline-block;
-  padding: 20px;
-  text-transform: uppercase;
-  font-family: 'Fjalla One', sans-serif;
-  letter-spacing: 2px;
-  cursor: pointer;
-}
-
-.right-side li a {
-  text-decoration: none;
-  color: #FFF;
-}
-
-.right-side li:hover {
-    background-color: #156884;
-}
-
-</style>
+{% include "header.html" %}
 
 <body>
-    <nav>
-        <div class="left-side"> Major work </div>
-        <div class="right-side">
-            <li> <a href="https://codepen.io/sashatran/">Home</a></li>
-            <li> <a href="http://sashatran.com">About</a></li>
-            <li> <a href="http://sashatran.com">Contact</a></li>
-        </div>
-    </nav>
+    {% include "menubar.html" %}
 	<ul>
-	{% for i in messages %}
-	<p>{{ i }}</p>
-	{% endfor %}
+	    {% for i in messages %}
+	    <p>{{ i }}</p>
+	    {% endfor %}
 	</ul>
 </body>
 
 </html>
+ 
