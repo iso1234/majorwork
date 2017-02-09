@@ -1,9 +1,19 @@
+from functools import wraps
 from flask import *
 import sqlAPI
 
 app = Flask(__name__)
-app.secret_key="Banana"
+app.secret_key="v\xf1\xb5\tr\xe2\xb3\x14!g"
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' in session:    
+            return f(*args, **kwargs)
+        else:
+            return redirect(url_for('login'))
+    return decorated_function
+    
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -11,7 +21,8 @@ def login():
     if request.method == "POST":
         # Check if the provided credentials are valid
         if sqlAPI.userInDB(request.form["email"], request.form["password"]):
-            flash("You were successfully logged in! (Not really)")
+            session['username'] = request.form["email"]
+            flash("You were successfully logged in!")
             return redirect(url_for("home"))
         else:
             error = "Oops! Wrong username/password."
@@ -40,6 +51,12 @@ def signup():
 @app.route("/")
 def home():
     return render_template("index.html", messages=get_flashed_messages())
+    
+
+@app.route("/logout")
+@login_required
+def logout():
+    return ""
 
 
 if __name__ == "__main__":
