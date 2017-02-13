@@ -5,6 +5,13 @@ import sqlAPI
 app = Flask(__name__)
 app.secret_key="v\xf1\xb5\tr\xe2\xb3\x14!g"
 
+def loginState():
+    if 'username' in session:
+        return True
+    else:
+        return False
+
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -13,9 +20,20 @@ def login_required(f):
         else:
             return redirect(url_for('login'))
     return decorated_function
+
+
+def logged_out_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:    
+            return f(*args, **kwargs)
+        else:
+            return redirect(url_for('logout'))
+    return decorated_function
     
 
 @app.route("/login", methods=["GET", "POST"])
+@logged_out_required
 def login():
     error = None
     if request.method == "POST":
@@ -26,7 +44,7 @@ def login():
             return redirect(url_for("home"))
         else:
             error = "Oops! Wrong username/password."
-    return render_template("login.html", error=error)
+    return render_template("login.html", error=error, loginState=loginState())
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -45,18 +63,21 @@ def signup():
                 error = "Oops! The username '{}' is already in use.".format(email)
         else:
             error = "Oops! The passwords you entered did not match"
-    return render_template("signup.html", error=error)
+    return render_template("signup.html", error=error, loginState=loginState())
 
 
 @app.route("/")
 def home():
-    return render_template("index.html", messages=get_flashed_messages())
+    return render_template("index.html", messages=get_flashed_messages(), loginState=loginState())
     
 
-@app.route("/logout")
+@app.route("/logout", methods=["GET", "POST"])
 @login_required
 def logout():
-    return ""
+    if request.method == "POST":
+        session.pop("username")
+        return redirect(url_for("home"))
+    return render_template("logout.html", loginState=loginState())
 
 
 if __name__ == "__main__":

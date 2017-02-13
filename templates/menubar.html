@@ -2,7 +2,7 @@
     <div class="left-side"> Major work </div>
     <div class="right-side">
         <li id="liHome">Home</li>
-        <li id="liLogin">Login</li>
+        {% if loginState==True %}<li id="liLogout">Logout</li>{% else %}<li id="liLogin">Login</li>{% endif %}
         <li id="liSignup">Signup</li>
     </div>
 </nav> 
