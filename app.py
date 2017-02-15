@@ -48,6 +48,7 @@ def login():
 
 
 @app.route("/signup", methods=["GET", "POST"])
+@logged_out_required
 def signup():
     error = None
     if request.method == "POST":
@@ -78,6 +79,12 @@ def logout():
         session.pop("username")
         return redirect(url_for("home"))
     return render_template("logout.html", loginState=loginState())
+
+
+@app.route("/mystudents")
+@login_required
+def mystudents():
+    return render_template("mystudents.html", loginState=loginState())
 
 
 if __name__ == "__main__":

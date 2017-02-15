@@ -11,4 +11,7 @@ $(document).ready(function() {
     $("#liSignup").click(function() {
         window.location.href = "/signup";
     });
+    $("#liMyStudents").click(function() {
+        window.location.href = "/mystudents";
+    });
 });
