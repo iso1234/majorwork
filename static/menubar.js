@@ -1,17 +1,17 @@
 $(document).ready(function() {
-    $("#liHome").click(function() {
+    $("li#Home").click(function() {
         window.location.href = "/";
     });
-    $("#liLogin").click(function() {
+    $("li#Login").click(function() {
         window.location.href = "/login";
     });
-    $("#liLogout").click(function() {
+    $("li#Logout").click(function() {
         window.location.href = "/logout";
     });
-    $("#liSignup").click(function() {
+    $("li#Signup").click(function() {
         window.location.href = "/signup";
     });
-    $("#liMyStudents").click(function() {
+    $("li#MyStudents").click(function() {
         window.location.href = "/mystudents";
     });
 });
