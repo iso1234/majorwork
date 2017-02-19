@@ -13,5 +13,12 @@ def createDB():
                 user_email VARCHAR(60),
                 user_password VARCHAR(45)
             ); """)
+        cur.execute("""CREATE TABLE students (
+                student_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_name VARCHAR(60),
+                student_key VARCHAR(60),
+                parent_id INTEGER NOT NULL
+            ); """)
         conn.commit()
         conn.close()
+        print("Database created")

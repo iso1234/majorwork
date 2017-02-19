@@ -10,15 +10,28 @@ except Exception: # "VACUUM" doesn't work in python3.6
     pass
 
 
-def userInDB(email, password):
-    """ Checks if the provided email and password are a valid user in the database.
-        Returns True or False. """
+def getUserData(email, password):
+    """ Retrieves user data if the email and password are a valid user in the database.
+        Returns the users info or False. """
     cursor.execute("SELECT * FROM users WHERE user_email=? AND user_password=?", (email, password))
     results = cursor.fetchall()
     if results:
-        return True
+        uid, email, *_ = results[0]
+        return {"uid": uid, "email": email}
     else:
         return False
+
+
+def getStudents(uid):
+    """ Returns the students that belong to the provided id,
+        returns false if there are no students belonging to that id """
+    cursor.execute("SELECT * FROM students WHERE parent_id=?", (uid,))
+    results = cursor.fetchall()
+    if results:
+        return {student[1]: student[2] for student in results}
+    else:
+        return {}
+    
 
 
 def insertData(email, password):
@@ -37,7 +50,7 @@ def insertData(email, password):
 def deleteUser(email, password):
     """ Deletes the user corresponding to the provided email and password from the database.
         Returns True if it was successful or False if the user doesn't exist. """
-    if isUserInDB(email, password):
+    if getUserData(email, password):
         cursor.execute("DELETE FROM users WHERE user_email=? AND user_password=?", (email, password))
         connection.commit()
         return True

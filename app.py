@@ -38,8 +38,10 @@ def login():
     error = None
     if request.method == "POST":
         # Check if the provided credentials are valid
-        if sqlAPI.userInDB(request.form["email"], request.form["password"]):
-            session['username'] = request.form["email"]
+        userInfo = sqlAPI.getUserData(request.form["email"], request.form["password"])
+        if userInfo:
+            session["username"] = userInfo["email"]
+            session["uid"] = userInfo["uid"]
             flash("You were successfully logged in!")
             return redirect(url_for("home"))
         else:
@@ -58,8 +60,17 @@ def signup():
         # Verify the data that was provided by the user and try to add it to the database
         if password == repeatPassword:
             if sqlAPI.insertData(email, password):
-                flash("You successfully signed up!")
-                return redirect(url_for("home"))
+                # Login the user
+                userInfo = sqlAPI.getUserData(request.form["email"], request.form["password"])
+                if userInfo:
+                    session["username"] = userInfo["email"]
+                    session["uid"] = userInfo["uid"]
+                    session["students"] = userInfo["students"]
+                    flash("You successfully signed up!")
+                    return redirect(url_for("home"))
+                else:
+                    print("Something went wrong; app.py; signup()")
+                    return redirect(url_for("login"))
             else: # If the username was already in use
                 error = "Oops! The username '{}' is already in use.".format(email)
         else:
@@ -84,6 +95,7 @@ def logout():
 @app.route("/mystudents")
 @login_required
 def mystudents():
+    print(sqlAPI.getStudents(session["uid"]))       ############ THIS NEEDS TO BE REMOVED
     return render_template("mystudents.html", loginState=loginState())
 
 
