@@ -31,11 +31,23 @@ def getStudents(uid):
         return {student[1]: student[2] for student in results}
     else:
         return {}
-    
+
+
+def addStudent(studentEmail, studentKey, parentID):
+    """ Inserts the provided information into the `students` table in the database.
+        Returns True if it was successful or False if that student has already been registered with that parent_id. """
+    cursor.execute("SELECT * FROM students WHERE student_email=? AND student_key=? AND parent_id=?", (studentEmail, studentKey, parentID))
+    results = cursor.fetchall()
+    if results:
+        return False
+    else:
+        cursor.execute("INSERT INTO students (student_email, student_key, parent_id) VALUES (?, ?, ?)", (studentEmail, studentKey, parentID))
+        connection.commit()
+        return True
 
 
 def insertData(email, password):
-    """ Inserts the provided email and password into the database.
+    """ Inserts the provided email and password into the `users` table in the database.
         Returns True if it was successful or False if that username is already is use. """
     cursor.execute("SELECT * FROM users WHERE user_email=?", (email,))
     results = cursor.fetchall()

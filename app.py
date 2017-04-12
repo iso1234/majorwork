@@ -65,7 +65,6 @@ def signup():
                 if userInfo:
                     session["username"] = userInfo["email"]
                     session["uid"] = userInfo["uid"]
-                    session["students"] = userInfo["students"]
                     flash("You successfully signed up!")
                     return redirect(url_for("home"))
                 else:
@@ -92,11 +91,20 @@ def logout():
     return render_template("logout.html", loginState=loginState())
 
 
-@app.route("/mystudents")
+@app.route("/mystudents", methods=["GET", "POST"])
 @login_required
 def mystudents():
-    print(sqlAPI.getStudents(session["uid"]))       ############ THIS NEEDS TO BE REMOVED
-    return render_template("mystudents.html", loginState=loginState())
+    error=None
+    if request.method == "POST":
+        studentEmail = request.form["studentEmail"]
+        # Send email
+        emailSent = sqlAPI.addStudent(studentEmail, "wtf", session["uid"]) # TODO
+        if emailSent:
+            flash("Email successfully sent! Please get the student that was registered to check their email. JKS email dnt wrk yet")
+            return redirect(url_for("home"))
+        else:
+            error = "Oops! The confimation email could not be sent. Please check the email address and try again later. JKS tht stdnt alrdy bn rgstrd"
+    return render_template("mystudents.html", loginState=loginState(), currentStudents=sqlAPI.getStudents(session["uid"]), error=error)
 
 
 if __name__ == "__main__":

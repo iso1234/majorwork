@@ -15,7 +15,7 @@ def createDB():
             ); """)
         cur.execute("""CREATE TABLE students (
                 student_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                student_name VARCHAR(60),
+                student_email VARCHAR(60),
                 student_key VARCHAR(60),
                 parent_id INTEGER NOT NULL
             ); """)
