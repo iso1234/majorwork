@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import *
 import sqlAPI
+import emailPackage
 
 app = Flask(__name__)
 app.secret_key="v\xf1\xb5\tr\xe2\xb3\x14!g"
@@ -95,16 +96,25 @@ def logout():
 @login_required
 def mystudents():
     error=None
+    currentStudents=sqlAPI.getStudents(session["uid"])
     if request.method == "POST":
         studentEmail = request.form["studentEmail"]
-        # Send email
-        emailSent = sqlAPI.addStudent(studentEmail, "wtf", session["uid"]) # TODO
-        if emailSent:
-            flash("Email successfully sent! Please get the student that was registered to check their email. JKS email dnt wrk yet")
-            return redirect(url_for("home"))
+        if studentEmail not in currentStudents:
+            # Send email
+            emailSent = emailPackage.sendEmail(studentEmail, session['username'], "randomkey")
+            if emailSent:
+                flash("Email successfully sent! Please get the student that was registered to check their email.")
+                return redirect(url_for("home"))
+            else:
+                error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
         else:
-            error = "Oops! The confimation email could not be sent. Please check the email address and try again later. JKS tht stdnt alrdy bn rgstrd"
-    return render_template("mystudents.html", loginState=loginState(), currentStudents=sqlAPI.getStudents(session["uid"]), error=error)
+            error = "Oops! You've already registered the student with the email address {}.".format(studentEmail)
+    return render_template("mystudents.html", loginState=loginState(), currentStudents=currentStudents, error=error)
+
+
+@app.route("/confirm/<key>")
+def confirm(key):
+    return key
 
 
 if __name__ == "__main__":

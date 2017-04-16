@@ -12,6 +12,7 @@ except Exception: # "VACUUM" doesn't work in python3.6
 
 def getUserData(email, password):
     """ Retrieves user data if the email and password are a valid user in the database.
+        Used when a user first logs-in.
         Returns the users info or False. """
     cursor.execute("SELECT * FROM users WHERE user_email=? AND user_password=?", (email, password))
     results = cursor.fetchall()
@@ -22,26 +23,26 @@ def getUserData(email, password):
         return False
 
 
-def getStudents(uid):
-    """ Returns the students that belong to the provided id,
+def getStudents(parentID):
+    """ Returns the emails of the students that belong to the provided id,
         returns false if there are no students belonging to that id """
-    cursor.execute("SELECT * FROM students WHERE parent_id=?", (uid,))
+    cursor.execute("SELECT * FROM students WHERE parent_id=?", (parentID,))
     results = cursor.fetchall()
     if results:
-        return {student[1]: student[2] for student in results}
+        return [student[0] for student in results]
     else:
-        return {}
+        return []
 
 
-def addStudent(studentEmail, studentKey, parentID):
+def addStudent(studentEmail, parentID):
     """ Inserts the provided information into the `students` table in the database.
         Returns True if it was successful or False if that student has already been registered with that parent_id. """
-    cursor.execute("SELECT * FROM students WHERE student_email=? AND student_key=? AND parent_id=?", (studentEmail, studentKey, parentID))
+    cursor.execute("SELECT * FROM students WHERE student_email=? AND parent_id=?", (studentEmail, parentID))
     results = cursor.fetchall()
     if results:
         return False
     else:
-        cursor.execute("INSERT INTO students (student_email, student_key, parent_id) VALUES (?, ?, ?)", (studentEmail, studentKey, parentID))
+        cursor.execute("INSERT INTO students (student_email, parent_id) VALUES (?, ?)", (studentEmail, parentID))
         connection.commit()
         return True
 
