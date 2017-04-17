@@ -17,6 +17,11 @@ def createDB():
                 student_email VARCHAR(60),
                 parent_id INTEGER NOT NULL
             ); """)
+        cur.execute("""CREATE TABLE pendingRequests (
+                student_email VARCHAR(60),
+                confirmation_key VARCHAR(60),
+                parent_id INTEGER NOT NULL
+            ); """)
         conn.commit()
         conn.close()
         print("Database created")

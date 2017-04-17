@@ -2,6 +2,7 @@ from functools import wraps
 from flask import *
 import sqlAPI
 import emailPackage
+import randomKey
 
 app = Flask(__name__)
 app.secret_key="v\xf1\xb5\tr\xe2\xb3\x14!g"
@@ -92,29 +93,44 @@ def logout():
     return render_template("logout.html", loginState=loginState())
 
 
+#NOTE I ALSO NEED TO ADD A CONDITION THAT CHECKS IF THE STUDENT IS IN THE DB ON THE PI
 @app.route("/mystudents", methods=["GET", "POST"])
 @login_required
 def mystudents():
-    error=None
-    currentStudents=sqlAPI.getStudents(session["uid"])
+    error = None
+    currentStudents = sqlAPI.getStudents(session["uid"])
     if request.method == "POST":
         studentEmail = request.form["studentEmail"]
         if studentEmail not in currentStudents:
-            # Send email
-            emailSent = emailPackage.sendEmail(studentEmail, session['username'], "randomkey")
-            if emailSent:
-                flash("Email successfully sent! Please get the student that was registered to check their email.")
-                return redirect(url_for("home"))
+            if not sqlAPI.alreadyInPendingRequests(studentEmail, session["username"]):
+                # Send email
+                randKey = randomKey.createRandomKey(sqlAPI.keysInUse())
+                emailSent = emailPackage.sendEmail(studentEmail, session['username'], randKey)
+                if emailSent:
+                    sqlAPI.addToPendingRequests(studentEmail, randKey, session['uid'])
+                    flash("Email successfully sent! Please get the student that was registered to check their email.")
+                    return redirect(url_for("home"))
+                else:
+                    # Email didn't work
+                    error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
             else:
-                error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
+                # Already pending request
+                error = "Oops! You've already sent a request email to the student with the email address {}.".format(studentEmail)
         else:
+            # Already registered
             error = "Oops! You've already registered the student with the email address {}.".format(studentEmail)
     return render_template("mystudents.html", loginState=loginState(), currentStudents=currentStudents, error=error)
 
 
-@app.route("/confirm/<key>")
+@app.route("/confirm/<key>", methods=["GET"])
 def confirm(key):
-    return key
+    # Check if that key has already been confirmed
+    if key in sqlAPI.keysInUse():
+        sqlAPI.confirmKey(key)
+        flash("Successfully confirmed.")
+    else:
+        flash("Oops! This <smthn> has already been confirmed.")
+    return redirect(url_for("home"))
 
 
 if __name__ == "__main__":

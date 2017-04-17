@@ -10,6 +10,42 @@ except Exception: # "VACUUM" doesn't work in python3.6
     pass
 
 
+def confirmKey(key):
+    """ Removes the record with 'key' in it from the 'pendingRequests' DB
+        and adds a new entry with the existing info to the 'students' DB """
+    # Get info
+    cursor.execute("SELECT * FROM pendingRequests WHERE confirmation_key=?", (key,))
+    results = cursor.fetchall()
+    # Delete from 'pendingRequests' DB
+    cursor.execute("DELETE FROM pendingRequests WHERE confirmation_key=?", (key,))
+    # Add to the 'students' DB
+    addStudent(results[0][0], results[0][2])
+    connection.commit()
+
+
+def alreadyInPendingRequests(studentEmail, parentID):
+    """ Checks if that student is already in the 'pendingRequests' table in the DB """
+    cursor.execute("SELECT * FROM pendingRequests WHERE student_email=? AND parent_id=?", (studentEmail, parentID))
+    results = cursor.fetchall()
+    if results:
+        return True
+    else:
+        return False
+
+
+def addToPendingRequests(studentEmail, confirmationKey, parentID):
+    """ Adds the given data to the 'pendingRequests' table in the DB """
+    cursor.execute("INSERT INTO pendingRequests (student_email, confirmation_key, parent_id) VALUES (?, ?, ?)", (studentEmail, confirmationKey, parentID))
+    connection.commit()
+
+
+def keysInUse():
+    """ Returns all the keys that are in use by the 'pendingRequests' DB """
+    cursor.execute("SELECT * FROM pendingRequests")
+    results = cursor.fetchall()
+    return [i[1] for i in results]
+
+
 def getUserData(email, password):
     """ Retrieves user data if the email and password are a valid user in the database.
         Used when a user first logs-in.
