@@ -9,6 +9,7 @@ except ImportError:
     print("It would be preferable to use python3.6 so I can use the secrets module")
     print("########################################################################")
     print("")
+    # Import a random module that works for previous versions of python
     import random
     currentModule = "r"
     

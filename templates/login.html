@@ -4,8 +4,8 @@
     {% include "menubar.html" %}
 	<h1>Please login</h1>
 	<form action="/login" method="post">
-		<input type="email" placeholder="email" name="email">
-		<input type="password" placeholder="password" name="password">
+		<input type="email" placeholder="email" name="userEmail" required>
+		<input type="password" placeholder="password" name="userPassword" required>
 		<input type="submit" value="Submit">
 	</form>
 	{% if error %}

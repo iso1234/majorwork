@@ -8,16 +8,19 @@ app = Flask(__name__)
 app.secret_key="v\xf1\xb5\tr\xe2\xb3\x14!g"
 
 def loginState():
-    if 'username' in session:
+    """ Returns True if the user is logged in, otherwise it returns false """
+    if 'userEmail' in session:
         return True
     else:
         return False
 
 
 def login_required(f):
+    """ A decorator used to restrict functions (pages in the website) to users that are logged in """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'username' in session:    
+        # If the user is looged in
+        if 'userEmail' in session:    
             return f(*args, **kwargs)
         else:
             return redirect(url_for('login'))
@@ -25,9 +28,11 @@ def login_required(f):
 
 
 def logged_out_required(f):
+    """ A decorator used to restrict functions (pages in the website) to users that are logged out """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'username' not in session:    
+        # If the user isn't logged in
+        if 'userEmail' not in session:    
             return f(*args, **kwargs)
         else:
             return redirect(url_for('logout'))
@@ -40,10 +45,9 @@ def login():
     error = None
     if request.method == "POST":
         # Check if the provided credentials are valid
-        userInfo = sqlAPI.getUserData(request.form["email"], request.form["password"])
-        if userInfo:
-            session["username"] = userInfo["email"]
-            session["uid"] = userInfo["uid"]
+        validCredentials = sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"])
+        if validCredentials:
+            session["userEmail"] = request.form["userEmail"]
             flash("You were successfully logged in!")
             return redirect(url_for("home"))
         else:
@@ -56,24 +60,23 @@ def login():
 def signup():
     error = None
     if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
-        repeatPassword = request.form["repeatPassword"]
+        signupEmail = request.form["signupEmail"]
+        signupPassword = request.form["signupPassword"]
+        signupRepeatPassword = request.form["signupRepeatPassword"]
         # Verify the data that was provided by the user and try to add it to the database
-        if password == repeatPassword:
-            if sqlAPI.insertData(email, password):
+        if signupPassword == signupRepeatPassword:
+            if sqlAPI.insertData(signupEmail, signupPassword):
                 # Login the user
-                userInfo = sqlAPI.getUserData(request.form["email"], request.form["password"])
-                if userInfo:
-                    session["username"] = userInfo["email"]
-                    session["uid"] = userInfo["uid"]
+                validCredentials = sqlAPI.userInDB(signupEmail, signupPassword)
+                if validCredentials:
+                    session["userEmail"] = signupEmail
                     flash("You successfully signed up!")
                     return redirect(url_for("home"))
                 else:
                     print("Something went wrong; app.py; signup()")
                     return redirect(url_for("login"))
             else: # If the username was already in use
-                error = "Oops! The username '{}' is already in use.".format(email)
+                error = "Oops! The username '{}' is already in use.".format(signupEmail)
         else:
             error = "Oops! The passwords you entered did not match"
     return render_template("signup.html", error=error, loginState=loginState())
@@ -88,7 +91,7 @@ def home():
 @login_required
 def logout():
     if request.method == "POST":
-        session.pop("username")
+        session.pop("userEmail")
         return redirect(url_for("home"))
     return render_template("logout.html", loginState=loginState())
 
@@ -98,16 +101,16 @@ def logout():
 @login_required
 def mystudents():
     error = None
-    currentStudents = sqlAPI.getStudents(session["uid"])
+    currentStudents = sqlAPI.getStudents(session["userEmail"])
     if request.method == "POST":
         studentEmail = request.form["studentEmail"]
         if studentEmail not in currentStudents:
-            if not sqlAPI.alreadyInPendingRequests(studentEmail, session["username"]):
+            if not sqlAPI.alreadyInPendingRequests(studentEmail, session["userEmail"]):
                 # Send email
                 randKey = randomKey.createRandomKey(sqlAPI.keysInUse())
-                emailSent = emailPackage.sendEmail(studentEmail, session['username'], randKey)
+                emailSent = emailPackage.sendEmail(studentEmail, session['userEmail'], randKey)
                 if emailSent:
-                    sqlAPI.addToPendingRequests(studentEmail, randKey, session['uid'])
+                    sqlAPI.addToPendingRequests(studentEmail, randKey, session['userEmail'])
                     flash("Email successfully sent! Please get the student that was registered to check their email.")
                     return redirect(url_for("home"))
                 else:
@@ -129,7 +132,7 @@ def confirm(key):
         sqlAPI.confirmKey(key)
         flash("Successfully confirmed.")
     else:
-        flash("Oops! This <smthn> has already been confirmed.")
+        flash("Oops! This request has already been confirmed.")
     return redirect(url_for("home"))
 
 

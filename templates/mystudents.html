@@ -11,7 +11,7 @@
     <p>To register a student please enter their email</p>
     <p>After you click submit the student you entered will be sent a confirmation email</p>
     <form action="/mystudents" method="post">
-		<input type="email" placeholder="student email" name="studentEmail">
+		<input type="email" placeholder="student email" name="studentEmail" required>
 		<input type="submit" value="Submit">
 	</form>
     {% if error %}
