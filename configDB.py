@@ -16,10 +16,15 @@ def createDB():
                 student_email VARCHAR(60),
                 user_email VARCHAR(60)
             ); """)
-        cur.execute("""CREATE TABLE pendingRequests (
+        cur.execute("""CREATE TABLE pendingStudentRequests (
                 student_email VARCHAR(60),
                 confirmation_key VARCHAR(60),
                 user_email VARCHAR(60)
+            ); """)
+        cur.execute("""CREATE TABLE pendingAccounts (
+                user_email VARCHAR(60),
+                confirmation_key VARCHAR(60),
+                user_password VARCHAR(60)
             ); """)
         conn.commit()
         conn.close()

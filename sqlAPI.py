@@ -10,28 +10,32 @@ except Exception: # "VACUUM" doesn't work in python3.6
     pass
 
 
-def confirmKey(key):
-    """ Removes the record with the provided 'key' (string) in it from the 'pendingRequests' table in the DB
-        and adds a new entry with the existing info (student_email and user_email) to the 'students' table """
+##==================================================================================================================##
+##==============================================  Pending Accounts  ================================================##
+##==================================================================================================================##
+
+
+def confirmPendingAccount(key):
+    """ Removes the record with the provided 'key' (string) in it from the 'pendingAccounts' table in the DB
+        and adds a new entry with the existing info (user_email and user_password) to the 'users' table """
     # Get info
-    cursor.execute("SELECT * FROM pendingRequests WHERE confirmation_key=?", (key,))
+    cursor.execute("SELECT * FROM pendingAccounts WHERE confirmation_key=?", (key,))
     results = cursor.fetchall()
-    # Delete from 'pendingRequests' DB
-    cursor.execute("DELETE FROM pendingRequests WHERE confirmation_key=?", (key,))
-    # Add to the 'students' DB
-    addStudent(results[0][0], results[0][2])
+    # Delete from 'pendingAccounts' table in the DB
+    cursor.execute("DELETE FROM pendingAccounts WHERE confirmation_key=?", (key,))
+    # Add to the 'users' table in the DB
+    addUser(results[0][0], results[0][2])
     connection.commit()
 
 
-def alreadyInPendingRequests(studentEmail, userEmail):
-    """ Checks in the 'pendingRequests' table in the DB to see if that user has already sent a request to that student
+def alreadyInPendingAccounts(userEmail):
+    """ Checks in the 'pendingAccounts' table in the DB to see if that user has already sent a confirmation email
     Input:
-    studentEmail (str) = the email of the student being looked for in the database
-    userEmail (str) = email of the user being looked for in the database
+    userEmail (str) = the email of the user being looked for in the database
     Output:
-    True (bool) = that set of data was found
-    False (bool) = that set of data wasn't found """
-    cursor.execute("SELECT * FROM pendingRequests WHERE student_email=? AND user_email=?", (studentEmail, userEmail))
+    True (bool) = the data was found
+    False (bool) = the data wasn't found """
+    cursor.execute("SELECT * FROM pendingAccounts WHERE user_email=?", (userEmail,))
     results = cursor.fetchall()
     if results:
         return True
@@ -39,18 +43,80 @@ def alreadyInPendingRequests(studentEmail, userEmail):
         return False
 
 
-def addToPendingRequests(studentEmail, confirmationKey, userEmail):
-    """ Adds the given data to the 'pendingRequests' table in the DB 
-    Input: all strings """
-    cursor.execute("INSERT INTO pendingRequests (student_email, confirmation_key, user_email) VALUES (?, ?, ?)", (studentEmail, confirmationKey, userEmail))
+def addToPendingAccounts(userEmail, confirmationKey, userPassword):
+    """ Adds the given data (all strings) to the 'pendingAccounts' table in the DB """
+    cursor.execute("INSERT INTO pendingAccounts (user_email, confirmation_key, user_password) VALUES (?, ?, ?)", (userEmail, confirmationKey, userPassword))
     connection.commit()
 
 
-def keysInUse():
-    """ Returns all the keys that are in use by the 'pendingRequests' DB as a list of strings """
-    cursor.execute("SELECT * FROM pendingRequests")
+def keysInPendingAccounts():
+    """ Returns all the keys that are in use by the 'pendingAccounts' table in the DB as a list of strings """
+    cursor.execute("SELECT * FROM pendingAccounts")
     results = cursor.fetchall()
     return [i[1] for i in results]
+
+
+##==================================================================================================================##
+##===========================================  Pending Student Requests  ===========================================##
+##==================================================================================================================##
+
+
+def confirmPendingStudentRequest(key):
+    """ Removes the record with the provided 'key' (string) in it from the 'pendingStudentRequests' table in the DB
+        and adds a new entry with the existing info (student_email and user_email) to the 'students' table """
+    # Get info
+    cursor.execute("SELECT * FROM pendingStudentRequests WHERE confirmation_key=?", (key,))
+    results = cursor.fetchall()
+    # Delete from 'pendingStudentRequests' table in the DB
+    cursor.execute("DELETE FROM pendingStudentRequests WHERE confirmation_key=?", (key,))
+    # Add to the 'students' table in the DB
+    addStudent(results[0][0], results[0][2])
+    connection.commit()
+
+
+def alreadyInPendingStudentRequests(studentEmail, userEmail):
+    """ Checks in the 'pendingStudentRequests' table in the DB to see if that user has already sent a request to that student
+    Input:
+    studentEmail (str) = the email of the student being looked for in the database
+    userEmail (str) = the email of the user being looked for in the database
+    Output:
+    True (bool) = the data was found
+    False (bool) = the data wasn't found """
+    cursor.execute("SELECT * FROM pendingStudentRequests WHERE student_email=? AND user_email=?", (studentEmail, userEmail))
+    results = cursor.fetchall()
+    if results:
+        return True
+    else:
+        return False
+
+
+def addToPendingStudentRequests(studentEmail, confirmationKey, userEmail):
+    """ Adds the given data (all strings) to the 'pendingStudentRequests' table in the DB """
+    cursor.execute("INSERT INTO pendingStudentRequests (student_email, confirmation_key, user_email) VALUES (?, ?, ?)", (studentEmail, confirmationKey, userEmail))
+    connection.commit()
+
+
+def keysInPendingStudentRequests():
+    """ Returns all the keys that are in use by the 'pendingStudentRequests' table in the DB as a list of strings """
+    cursor.execute("SELECT * FROM pendingStudentRequests")
+    results = cursor.fetchall()
+    return [i[1] for i in results]
+
+
+##==================================================================================================================##
+##====================================================  Users  =====================================================##
+##==================================================================================================================##
+
+
+def userEmailInUse(userEmail):
+    """ Checks in the 'users' table in the DB to see if that user email (string) is already in use,
+    returns True (bool) if it is otherwise it returns False (bool) """
+    cursor.execute("SELECT * FROM users WHERE user_email=?", (userEmail,))
+    results = cursor.fetchall()
+    if results:
+        return True
+    else:
+        return False
 
 
 def userInDB(userEmail, userPassword):
@@ -67,6 +133,35 @@ def userInDB(userEmail, userPassword):
         return True
     else:
         return False
+
+
+def addUser(userEmail, userPassword):
+    """ Inserts the provided email and password (both strings) into the 'users' table in the DB.
+        Returns True (bool) if it was successful or False (bool) if that email is already is use. """
+    cursor.execute("SELECT * FROM users WHERE user_email=?", (userEmail,))
+    results = cursor.fetchall()
+    if results:
+        return False
+    else:
+        cursor.execute("INSERT INTO users (user_email, user_password) VALUES (?, ?)", (userEmail, userPassword))
+        connection.commit()
+        return True
+
+
+def deleteUser(userEmail, userPassword):
+    """ Deletes the user corresponding to the provided email and password (both strings) from the database.
+        Returns True (bool) if it was successful or False (bool) if the user doesn't exist. """
+    if getUserData(email, password):
+        cursor.execute("DELETE FROM users WHERE user_email=? AND user_password=?", (userEmail, userPassword))
+        connection.commit()
+        return True
+    else:
+        return False
+
+
+##==================================================================================================================##
+##===================================================  Students  ===================================================##
+##==================================================================================================================##
 
 
 def getStudents(userEmail):
@@ -91,27 +186,3 @@ def addStudent(studentEmail, userEmail):
         cursor.execute("INSERT INTO students (student_email, user_email) VALUES (?, ?)", (studentEmail, userEmail))
         connection.commit()
         return True
-
-
-def insertData(userEmail, userPassword):
-    """ Inserts the provided email and password (both strings) into the 'users' table in the DB.
-        Returns True (bool) if it was successful or False (bool) if that email is already is use. """
-    cursor.execute("SELECT * FROM users WHERE user_email=?", (userEmail,))
-    results = cursor.fetchall()
-    if results:
-        return False
-    else:
-        cursor.execute("INSERT INTO users (user_email, user_password) VALUES (?, ?)", (userEmail, userPassword))
-        connection.commit()
-        return True
-
-
-def deleteUser(userEmail, userPassword):
-    """ Deletes the user corresponding to the provided email and password (both strings) from the database.
-        Returns True (bool) if it was successful or False (bool) if the user doesn't exist. """
-    if getUserData(email, password):
-        cursor.execute("DELETE FROM users WHERE user_email=? AND user_password=?", (userEmail, userPassword))
-        connection.commit()
-        return True
-    else:
-        return False

@@ -63,23 +63,39 @@ def signup():
         signupEmail = request.form["signupEmail"]
         signupPassword = request.form["signupPassword"]
         signupRepeatPassword = request.form["signupRepeatPassword"]
-        # Verify the data that was provided by the user and try to add it to the database
+        # Verify the data that was provided by the user and send a confirmation email
         if signupPassword == signupRepeatPassword:
-            if sqlAPI.insertData(signupEmail, signupPassword):
-                # Login the user
-                validCredentials = sqlAPI.userInDB(signupEmail, signupPassword)
-                if validCredentials:
-                    session["userEmail"] = signupEmail
-                    flash("You successfully signed up!")
-                    return redirect(url_for("home"))
+            if not sqlAPI.userEmailInUse(signupEmail):
+                if not sqlAPI.alreadyInPendingAccounts(signupEmail):
+                    # Send email
+                    randKey = randomKey.createRandomKey(sqlAPI.keysInPendingAccounts())
+                    emailSent = emailPackage.sendEmail(signupEmail, signupEmail, randKey, "a")
+                    if emailSent:
+                        sqlAPI.addToPendingAccounts(signupEmail, randKey, signupPassword)
+                        flash("Email successfully sent! Please check your email to confirm your account.")
+                        return redirect(url_for("home"))
+                    else:
+                        # Email didn't work
+                        error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
                 else:
-                    print("Something went wrong; app.py; signup()")
-                    return redirect(url_for("login"))
+                    # Already pending request
+                    error = "Oops! A confirmation email has been sent to '{}', please use it to confirm your account and login.".format(signupEmail)
             else: # If the username was already in use
                 error = "Oops! The username '{}' is already in use.".format(signupEmail)
         else:
             error = "Oops! The passwords you entered did not match"
     return render_template("signup.html", error=error, loginState=loginState())
+
+
+@app.route("/confirmAccount/<key>", methods=["GET"])
+def confirmAccount(key):
+    # Check if that key has already been confirmed
+    if key in sqlAPI.keysInPendingAccounts():
+        sqlAPI.confirmPendingAccount(key)
+        flash("Successfully confirmed.")
+    else:
+        flash("Oops! This request has already been confirmed.")
+    return redirect(url_for("home"))
 
 
 @app.route("/")
@@ -105,12 +121,12 @@ def mystudents():
     if request.method == "POST":
         studentEmail = request.form["studentEmail"]
         if studentEmail not in currentStudents:
-            if not sqlAPI.alreadyInPendingRequests(studentEmail, session["userEmail"]):
+            if not sqlAPI.alreadyInPendingStudentRequests(studentEmail, session["userEmail"]):
                 # Send email
-                randKey = randomKey.createRandomKey(sqlAPI.keysInUse())
-                emailSent = emailPackage.sendEmail(studentEmail, session['userEmail'], randKey)
+                randKey = randomKey.createRandomKey(sqlAPI.keysInPendingStudentRequests())
+                emailSent = emailPackage.sendEmail(studentEmail, session['userEmail'], randKey, "s")
                 if emailSent:
-                    sqlAPI.addToPendingRequests(studentEmail, randKey, session['userEmail'])
+                    sqlAPI.addToPendingStudentRequests(studentEmail, randKey, session['userEmail'])
                     flash("Email successfully sent! Please get the student that was registered to check their email.")
                     return redirect(url_for("home"))
                 else:
@@ -125,11 +141,11 @@ def mystudents():
     return render_template("mystudents.html", loginState=loginState(), currentStudents=currentStudents, error=error)
 
 
-@app.route("/confirm/<key>", methods=["GET"])
-def confirm(key):
+@app.route("/confirmStudentRequest/<key>", methods=["GET"])
+def confirmStudentRequest(key):
     # Check if that key has already been confirmed
-    if key in sqlAPI.keysInUse():
-        sqlAPI.confirmKey(key)
+    if key in sqlAPI.keysInPendingStudentRequests():
+        sqlAPI.confirmPendingStudentRequest(key)
         flash("Successfully confirmed.")
     else:
         flash("Oops! This request has already been confirmed.")
