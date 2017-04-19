@@ -7,9 +7,9 @@ def sendEmail(toAddrs, user_email, key, emailType):
     Input:
     toAddrs (str) = the address the email will be sent to
     user_email (str) = the email of the user that is requesting access to the students information (in the case of
-                    account confirmation this will be the same as the toAddrs)
+                    account confirmation or password reset this will be the same as the toAddrs)
     key (str) = a randomly generated key used to verify the email address
-    emailType (str) = this indicates whether it is a student confirmation ('s') or an account confirmation ('a')
+    emailType (str) = this indicates whether it is a student confirmation ('s'), an account confirmation ('a') or a password reset ('r')
     Output:
     True (Bool) = the email was successfully sent
     False (Bool) = something went wrong """
@@ -33,6 +33,15 @@ def sendEmail(toAddrs, user_email, key, emailType):
                 "Visit the link below to confirm your account",
                 "www.localhost:5000/confirmAccount/{}".format(key)
         ]
+    elif emailType == "r": # Password reset
+        msgHead = "From: {}\r\nTo: {}\r\nSubject: Reset password\r\n".format(FROMADDRS, toAddrs)
+        msgBody = [
+                "Hello,",
+                "Visit the link below to reset your password",
+                "www.localhost:5000/resetPassword/{}".format(key)
+        ]
+    else:
+        return False
     
     # Construct a connection with the smtp server "smtp.gmail.com" through defaut port 25
     smtpConnection = smtplib.SMTP("smtp.gmail.com", 25)

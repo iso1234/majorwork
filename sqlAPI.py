@@ -11,6 +11,55 @@ except Exception: # "VACUUM" doesn't work in python3.6
 
 
 ##==================================================================================================================##
+##===========================================  Pending password resets  =============================================##
+##==================================================================================================================##
+
+
+def resetPassword(key, newPassword):
+    """ Removes the record with the provided 'key' (string) in it from the 'pendingPasswordResets' table in the DB,
+        deletes the old entry from the 'users' table and adds a new entry with the updated password,
+        newPassword (string), to the 'users' table """
+    # Get info
+    cursor.execute("SELECT * FROM pendingPasswordResets WHERE confirmation_key=?", (key,))
+    userEmail = cursor.fetchall()[0][0]
+    # Delete from 'pendingPasswordResets' table in the DB
+    cursor.execute("DELETE FROM pendingPasswordResets WHERE confirmation_key=?", (key,))
+    # Delete the old entry from 'users' table
+    cursor.execute("DELETE FROM users WHERE user_email=?", (userEmail,))
+    # Add to the 'users' table in the DB
+    addUser(userEmail, newPassword)
+    connection.commit()
+
+
+def alreadyInPendingPasswordResets(userEmail):
+    """ Checks in the 'pendingPasswordResets' table in the DB to see if that user has already sent a confirmation email
+    Input:
+    userEmail (str) = the email of the user being looked for in the database
+    Output:
+    True (bool) = the data was found
+    False (bool) = the data wasn't found """
+    cursor.execute("SELECT * FROM pendingPasswordResets WHERE user_email=?", (userEmail,))
+    results = cursor.fetchall()
+    if results:
+        return True
+    else:
+        return False
+
+
+def addToPendingPasswordResets(userEmail, confirmationKey):
+    """ Adds the given data (all strings) to the 'pendingAccounts' table in the DB """
+    cursor.execute("INSERT INTO pendingPasswordResets (user_email, confirmation_key) VALUES (?, ?)", (userEmail, confirmationKey))
+    connection.commit()
+
+
+def keysInPendingPasswordResets():
+    """ Returns all the keys that are in use by the 'pendingPasswordResets' table in the DB as a list of strings """
+    cursor.execute("SELECT * FROM pendingPasswordResets")
+    results = cursor.fetchall()
+    return [i[1] for i in results]
+
+
+##==================================================================================================================##
 ##==============================================  Pending Accounts  ================================================##
 ##==================================================================================================================##
 

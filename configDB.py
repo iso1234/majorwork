@@ -26,6 +26,10 @@ def createDB():
                 confirmation_key VARCHAR(60),
                 user_password VARCHAR(60)
             ); """)
+        cur.execute("""CREATE TABLE pendingPasswordResets (
+                user_email VARCHAR(60),
+                confirmation_key VARCHAR(60)
+            ); """)
         conn.commit()
         conn.close()
         print("Database created")

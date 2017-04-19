@@ -87,7 +87,7 @@ def signup():
     return render_template("signup.html", error=error, loginState=loginState())
 
 
-@app.route("/confirmAccount/<key>", methods=["GET"])
+@app.route("/confirmAccount/<key>")
 def confirmAccount(key):
     # Check if that key has already been confirmed
     if key in sqlAPI.keysInPendingAccounts():
@@ -141,7 +141,7 @@ def mystudents():
     return render_template("mystudents.html", loginState=loginState(), currentStudents=currentStudents, error=error)
 
 
-@app.route("/confirmStudentRequest/<key>", methods=["GET"])
+@app.route("/confirmStudentRequest/<key>")
 def confirmStudentRequest(key):
     # Check if that key has already been confirmed
     if key in sqlAPI.keysInPendingStudentRequests():
@@ -150,7 +150,55 @@ def confirmStudentRequest(key):
     else:
         flash("Oops! This request has already been confirmed.")
     return redirect(url_for("home"))
+    
+    
+@app.route("/sendResetPasswordEmail", methods=["POST"])
+def sendResetPasswordEmail():
+    if request.method == "POST":
+        userEmail = request.form["userEmail"]
+        # If the email is actually attached to an account
+        if sqlAPI.userEmailInUse(userEmail):
+            # If a reset email hasn't already been sent
+            if not sqlAPI.alreadyInPendingPasswordResets(userEmail):
+                # Send email
+                randKey = randomKey.createRandomKey(sqlAPI.keysInPendingPasswordResets())
+                emailSent = emailPackage.sendEmail(userEmail, userEmail, randKey, "r")
+                if emailSent:
+                    sqlAPI.addToPendingPasswordResets(userEmail, randKey)
+                    flash("Email successfully sent! Please check your email address.")
+                    return redirect(url_for("home"))
+                else:
+                    # Email didn't work
+                    error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
+            else:
+                flash("Oops! A reset password email has already been sent to '{}', please use it to reset your password.".format(userEmail))
+        else:
+            # If the email is awaiting confirmation
+            if sqlAPI.alreadyInPendingAccounts(userEmail):
+                flash("Oops! A confirmation email has been sent to '{}', please use it to confirm your account and login.".format(userEmail))
+            else:
+                flash("Oops! That email isn't associated with an account, please enter the email associated with your account or register an account.")
+    return redirect(url_for("home"))
+    
 
+@app.route("/resetPassword", methods=["POST"])    
+@app.route("/resetPassword/<key>", methods=["GET"])
+def resetPassword(key=""):
+    if request.method == "GET":
+        if key in sqlAPI.keysInPendingPasswordResets():
+            return render_template("resetpassword.html", key=key, messages=get_flashed_messages())
+        else:
+            flash("Oops! This password has already been reset.")
+            return redirect(url_for("home"))
+    elif request.method == "POST":
+        if request.form["resetPassword"] == request.form["resetRepeatPassword"]:
+            sqlAPI.resetPassword(request.form["resetKey"], request.form["resetPassword"])
+            flash("Password successfully reset.")
+            return redirect(url_for("home"))
+        else:
+            flash("Oops! The passwords you entered don't match. Please enter two matching passwords.")
+            return redirect(url_for("resetPassword") + "/" + request.form["resetKey"])
+        
 
 if __name__ == "__main__":
     app.run()
