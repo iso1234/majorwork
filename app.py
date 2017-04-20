@@ -1,8 +1,9 @@
 from functools import wraps
-from flask import *
+from flask import Flask, redirect, url_for, request, session, flash, get_flashed_messages
 import sqlAPI
 import emailPackage
 import randomKey
+from templateEngine import renderTemplate
 
 app = Flask(__name__)
 app.secret_key="v\xf1\xb5\tr\xe2\xb3\x14!g"
@@ -52,7 +53,7 @@ def login():
             return redirect(url_for("home"))
         else:
             error = "Oops! Wrong username/password."
-    return render_template("login.html", error=error, loginState=loginState())
+    return renderTemplate("login.html", {"error": error, "loginState": loginState()})
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -84,7 +85,7 @@ def signup():
                 error = "Oops! The username '{}' is already in use.".format(signupEmail)
         else:
             error = "Oops! The passwords you entered did not match"
-    return render_template("signup.html", error=error, loginState=loginState())
+    return renderTemplate("signup.html", {"error": error, "loginState": loginState()})
 
 
 @app.route("/confirmAccount/<key>")
@@ -100,7 +101,7 @@ def confirmAccount(key):
 
 @app.route("/")
 def home():
-    return render_template("index.html", messages=get_flashed_messages(), loginState=loginState())
+    return renderTemplate("index.html", {"messages": get_flashed_messages(), "loginState": loginState()})
     
 
 @app.route("/logout", methods=["GET", "POST"])
@@ -109,7 +110,7 @@ def logout():
     if request.method == "POST":
         session.pop("userEmail")
         return redirect(url_for("home"))
-    return render_template("logout.html", loginState=loginState())
+    return renderTemplate("logout.html", {"loginState": loginState()})
 
 
 #NOTE I ALSO NEED TO ADD A CONDITION THAT CHECKS IF THE STUDENT IS IN THE DB ON THE PI
@@ -138,7 +139,7 @@ def mystudents():
         else:
             # Already registered
             error = "Oops! You've already registered the student with the email address {}.".format(studentEmail)
-    return render_template("mystudents.html", loginState=loginState(), currentStudents=currentStudents, error=error)
+    return renderTemplate("mystudents.html", {"loginState": loginState(), "currentStudents": currentStudents, "error": error})
 
 
 @app.route("/confirmStudentRequest/<key>")
@@ -186,7 +187,7 @@ def sendResetPasswordEmail():
 def resetPassword(key=""):
     if request.method == "GET":
         if key in sqlAPI.keysInPendingPasswordResets():
-            return render_template("resetpassword.html", key=key, messages=get_flashed_messages())
+            return renderTemplate("resetpassword.html", {"key": key, "messages": get_flashed_messages()})
         else:
             flash("Oops! This password has already been reset.")
             return redirect(url_for("home"))
