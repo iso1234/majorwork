@@ -117,7 +117,7 @@ def logout():
     return renderTemplate("logout.html", {"loginState": loginState()})
 
 
-#NOTE I ALSO NEED TO ADD A CONDITION THAT CHECKS IF THE STUDENT IS IN THE DB ON THE PI
+
 @app.route("/mystudents", methods=["GET", "POST"])
 @login_required
 def mystudents():
@@ -127,16 +127,20 @@ def mystudents():
         studentEmail = request.form["studentEmail"]
         if studentEmail not in currentStudents:
             if not sqlAPI.alreadyInPendingStudentRequests(studentEmail, session["userEmail"]):
-                # Send email
-                randKey = randomKey.createRandomKey(sqlAPI.keysInPendingStudentRequests())
-                emailSent = emailPackage.sendEmail(studentEmail, session['userEmail'], randKey, "s", ADDRESS)
-                if emailSent:
-                    sqlAPI.addToPendingStudentRequests(studentEmail, randKey, session['userEmail'])
-                    flash("Email successfully sent! Please get the student that was registered to check their email.")
-                    return redirect(url_for("home"))
+                if sqlAPI.getStudentCardID(studentEmail):
+                    # Send email
+                    randKey = randomKey.createRandomKey(sqlAPI.keysInPendingStudentRequests())
+                    emailSent = emailPackage.sendEmail(studentEmail, session['userEmail'], randKey, "s", ADDRESS)
+                    if emailSent:
+                        sqlAPI.addToPendingStudentRequests(studentEmail, randKey, session['userEmail'])
+                        flash("Email successfully sent! Please get the student that was registered to check their email.")
+                        return redirect(url_for("home"))
+                    else:
+                        # Email didn't work
+                        error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
                 else:
-                    # Email didn't work
-                    error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
+                     # Student isn't registered in the system
+                    error = "Oops! That student isn't registered with our system."
             else:
                 # Already pending request
                 error = "Oops! You've already sent a request email to the student with the email address {}.".format(studentEmail)
