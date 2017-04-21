@@ -8,6 +8,10 @@ from templateEngine import renderTemplate
 app = Flask(__name__)
 app.secret_key="v\xf1\xb5\tr\xe2\xb3\x14!g"
 
+IP = "127.0.0.1"
+PORT = "5000"
+ADDRESS = IP + ":" + PORT
+
 def loginState():
     """ Returns True if the user is logged in, otherwise it returns false """
     if 'userEmail' in session:
@@ -70,7 +74,7 @@ def signup():
                 if not sqlAPI.alreadyInPendingAccounts(signupEmail):
                     # Send email
                     randKey = randomKey.createRandomKey(sqlAPI.keysInPendingAccounts())
-                    emailSent = emailPackage.sendEmail(signupEmail, signupEmail, randKey, "a")
+                    emailSent = emailPackage.sendEmail(signupEmail, signupEmail, randKey, "a", ADDRESS)
                     if emailSent:
                         sqlAPI.addToPendingAccounts(signupEmail, randKey, signupPassword)
                         flash("Email successfully sent! Please check your email to confirm your account.")
@@ -125,7 +129,7 @@ def mystudents():
             if not sqlAPI.alreadyInPendingStudentRequests(studentEmail, session["userEmail"]):
                 # Send email
                 randKey = randomKey.createRandomKey(sqlAPI.keysInPendingStudentRequests())
-                emailSent = emailPackage.sendEmail(studentEmail, session['userEmail'], randKey, "s")
+                emailSent = emailPackage.sendEmail(studentEmail, session['userEmail'], randKey, "s", ADDRESS)
                 if emailSent:
                     sqlAPI.addToPendingStudentRequests(studentEmail, randKey, session['userEmail'])
                     flash("Email successfully sent! Please get the student that was registered to check their email.")
@@ -163,7 +167,7 @@ def sendResetPasswordEmail():
             if not sqlAPI.alreadyInPendingPasswordResets(userEmail):
                 # Send email
                 randKey = randomKey.createRandomKey(sqlAPI.keysInPendingPasswordResets())
-                emailSent = emailPackage.sendEmail(userEmail, userEmail, randKey, "r")
+                emailSent = emailPackage.sendEmail(userEmail, userEmail, randKey, "r", ADDRESS)
                 if emailSent:
                     sqlAPI.addToPendingPasswordResets(userEmail, randKey)
                     flash("Email successfully sent! Please check your email address.")
@@ -211,7 +215,7 @@ def deleteAccunt():
                 if not sqlAPI.alreadyInPendingDeletedAccounts(userEmail):
                     # Send email
                     randKey = randomKey.createRandomKey(sqlAPI.keysInPendingDeletedAccounts())
-                    emailSent = emailPackage.sendEmail(userEmail, userEmail, randKey, "d")
+                    emailSent = emailPackage.sendEmail(userEmail, userEmail, randKey, "d", ADDRESS)
                     if emailSent:
                         sqlAPI.addToPendingDeletedAccounts(userEmail, randKey)
                         flash("Email successfully sent! Visit your email to confirm the deletion of your account.")
@@ -244,4 +248,4 @@ def confirmDeleteAccount(key):
         
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host=IP)

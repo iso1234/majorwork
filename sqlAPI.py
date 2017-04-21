@@ -3,7 +3,7 @@ import sqlite3
 import os
 import time
 
-connection = sqlite3.connect("main.db")
+connection = sqlite3.connect("main.db", check_same_thread=False)
 cursor = connection.cursor()
 try:
     # Perform a VACUUM on the data (defragments and gets rid of supposedly empty tables that have left behind junk)
@@ -269,11 +269,12 @@ def deleteUser(userEmail):
 def getTimeData(cardID):
     """ Returns a list of 20 of the most recent time data for the provided cardID (string) """
     if os.path.exists("../cardTerminalUI/studentTimes.db"):
-        piDBConnection = sqlite3.connect("../cardTerminalUI/studentTimes.db")
+        piDBConnection = sqlite3.connect("../cardTerminalUI/studentTimes.db", check_same_thread=False)
         piDBCursor = piDBConnection.cursor()
         piDBCursor.execute("SELECT time FROM cardTimes WHERE card_id=? ORDER BY time DESC LIMIT 20", (cardID,))
         results = piDBCursor.fetchall()
-        return [time.strftime("%a, %d %b %Y %I:%M:%S %p", t.localtime(float(i[0]))) for i in results]
+        piDBConnection.close()
+        return [time.strftime("%a, %d %b %Y %I:%M:%S %p", time.localtime(float(i[0]))) for i in results]
     else:
         return ["time1", "time2", "time3"]
 

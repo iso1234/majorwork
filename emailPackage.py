@@ -2,7 +2,7 @@ import smtplib
 
 FROMADDRS = "lapisnoreply@gmail.com"
 
-def sendEmail(toAddrs, user_email, key, emailType):
+def sendEmail(toAddrs, user_email, key, emailType, ADDRESS):
     """ Send a confimation email to the email stored in 'toAddrs' 
     Input:
     toAddrs (str) = the address the email will be sent to
@@ -22,7 +22,7 @@ def sendEmail(toAddrs, user_email, key, emailType):
                 "'{}' has requested that they have access to your arrival and departure times at after school study recorded by lapis".format(user_email),
                 "\n",
                 "Visit the link below to accept this",
-                "www.localhost:5000/confirmStudentRequest/{}".format(key)
+                ADDRESS + "/confirmStudentRequest/{}".format(key)
         ]
     elif emailType == "a": # Account confirmation
         msgHead = "From: {}\r\nTo: {}\r\nSubject: Confirm your account\r\n".format(FROMADDRS, toAddrs)
@@ -31,21 +31,21 @@ def sendEmail(toAddrs, user_email, key, emailType):
                 "Thanks for signing up with lapis!",
                 "\n",
                 "Visit the link below to confirm your account",
-                "www.localhost:5000/confirmAccount/{}".format(key)
+                ADDRESS + "/confirmAccount/{}".format(key)
         ]
     elif emailType == "r": # Password reset
         msgHead = "From: {}\r\nTo: {}\r\nSubject: Reset password\r\n".format(FROMADDRS, toAddrs)
         msgBody = [
                 "Hello,",
                 "Visit the link below to reset your password",
-                "www.localhost:5000/resetPassword/{}".format(key)
+                ADDRESS + "/resetPassword/{}".format(key)
         ]
     elif emailType == "d": # Account deletion
         msgHead = "From: {}\r\nTo: {}\r\nSubject: Delete my account\r\n".format(FROMADDRS, toAddrs)
         msgBody = [
                 "Hello,",
                 "Visit the link below to delete your account",
-                "www.localhost:5000/confirmDeleteAccount/{}".format(key)
+                ADDRESS + "/confirmDeleteAccount/{}".format(key)
         ]
     else:
         print("Unknown email type: " + emailType)
