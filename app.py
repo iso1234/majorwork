@@ -139,7 +139,7 @@ def mystudents():
         else:
             # Already registered
             error = "Oops! You've already registered the student with the email address {}.".format(studentEmail)
-    return renderTemplate("mystudents.html", {"loginState": loginState(), "currentStudents": currentStudents, "error": error})
+    return renderTemplate("mystudents.html", {"loginState": loginState(), "studentInfo": sqlAPI.getStudentInfo(session["userEmail"]), "error": error})
 
 
 @app.route("/confirmStudentRequest/<key>")

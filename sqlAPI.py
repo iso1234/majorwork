@@ -1,5 +1,7 @@
 # The API that will be used to interface with the database
 import sqlite3
+import os
+import time
 
 connection = sqlite3.connect("main.db")
 cursor = connection.cursor()
@@ -262,6 +264,38 @@ def deleteUser(userEmail):
 ##==================================================================================================================##
 ##===================================================  Students  ===================================================##
 ##==================================================================================================================##
+
+
+def getTimeData(cardID):
+    """ Returns a list of 20 of the most recent time data for the provided cardID (string) """
+    if os.path.exists("../cardTerminalUI/studentTimes.db"):
+        piDBConnection = sqlite3.connect("../cardTerminalUI/studentTimes.db")
+        piDBCursor = piDBConnection.cursor()
+        piDBCursor.execute("SELECT time FROM cardTimes WHERE card_id=? ORDER BY time DESC LIMIT 20", (cardID,))
+        results = piDBCursor.fetchall()
+        return [time.strftime("%a, %d %b %Y %I:%M:%S %p", t.localtime(float(i[0]))) for i in results]
+    else:
+        return ["time1", "time2", "time3"]
+
+
+def getStudentInfo(userEmail):
+    """ Returns a dictionary containing the time data for each student associated with the given userEmail (string). 
+        Keys are the names of the students, the value is a list where each element is a piece of time data """
+    students = getStudents(userEmail)
+    output = {}
+    for studentEmail in students:
+        output[studentEmail] = getTimeData(getStudentCardID(studentEmail))
+    return output
+        
+        
+def getStudentCardID(studentEmail):
+    """ Returns the card ID (string) that corresponds to the student email (string) that was provided """
+    cursor.execute("SELECT * FROM studentCardIDs WHERE student_email=?", (studentEmail,))
+    results = cursor.fetchall()
+    if results:
+        return results[0][1]
+    else:
+        return []
 
 
 def getStudents(userEmail):

@@ -2,11 +2,13 @@
 <body>
     {% include "menubar.html" %}
     <h1>Current students</h1>
-    {% if currentStudents %}
-    <ul>
-        {% for i in currentStudents %}<li>{{i}}</li>{% endfor %}
-    </ul>
-    {% else %}No Students have been registered{% endif %}
+    {% if studentInfo %}
+        <p>{% for name in studentInfo %}{{ name }}</p>
+            <ul>{% for i in studentInfo[name] %}<li>{{i}}</li>{% endfor %}</ul>
+        {% endfor %}
+    {% else %}
+        <p>No Students have been registered</p>
+    {% endif %}
 	<h1>Register students</h1>
     <p>To register a student please enter their email</p>
     <p>After you click submit the student you entered will be sent a confirmation email</p>
