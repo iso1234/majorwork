@@ -7,9 +7,9 @@ def sendEmail(toAddrs, user_email, key, emailType):
     Input:
     toAddrs (str) = the address the email will be sent to
     user_email (str) = the email of the user that is requesting access to the students information (in the case of
-                    account confirmation or password reset this will be the same as the toAddrs)
+                    account confirmation, password reset or account deletion this will be the same as the toAddrs)
     key (str) = a randomly generated key used to verify the email address
-    emailType (str) = this indicates whether it is a student confirmation ('s'), an account confirmation ('a') or a password reset ('r')
+    emailType (str) = this indicates whether it is a student confirmation ('s'), account confirmation ('a'), password reset ('r') or account deletion ('d')
     Output:
     True (Bool) = the email was successfully sent
     False (Bool) = something went wrong """
@@ -40,7 +40,15 @@ def sendEmail(toAddrs, user_email, key, emailType):
                 "Visit the link below to reset your password",
                 "www.localhost:5000/resetPassword/{}".format(key)
         ]
+    elif emailType == "d": # Account deletion
+        msgHead = "From: {}\r\nTo: {}\r\nSubject: Delete my account\r\n".format(FROMADDRS, toAddrs)
+        msgBody = [
+                "Hello,",
+                "Visit the link below to delete your account",
+                "www.localhost:5000/confirmDeleteAccount/{}".format(key)
+        ]
     else:
+        print("Unknown email type: " + emailType)
         return False
     
     # Construct a connection with the smtp server "smtp.gmail.com" through defaut port 25

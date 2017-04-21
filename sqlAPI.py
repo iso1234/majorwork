@@ -11,6 +11,52 @@ except Exception: # "VACUUM" doesn't work in python3.6
 
 
 ##==================================================================================================================##
+##===========================================  Pending Deleted Accounts  ===========================================##
+##==================================================================================================================##
+
+
+def confirmPendingDeletedAccount(key):
+    """ Removes the record with the provided 'key' (string) in it from the 'pendingDeletedAccounts' table in the DB
+        and deletes the corresponding account in the 'users' table """
+    # Get info
+    cursor.execute("SELECT * FROM pendingDeletedAccounts WHERE confirmation_key=?", (key,))
+    results = cursor.fetchall()
+    # Delete from 'pendingDeletedAccounts' table in the DB
+    cursor.execute("DELETE FROM pendingDeletedAccounts WHERE confirmation_key=?", (key,))
+    # Delete from 'users' table in the DB
+    deleteUser(results[0][0])
+    connection.commit()
+
+
+def alreadyInPendingDeletedAccounts(userEmail):
+    """ Checks in the 'pendingDeletedAccounts' table in the DB to see if that user has already sent a request for their account to be deleted
+    Input:
+    userEmail (str) = the email of the user being looked for in the database
+    Output:
+    True (bool) = the data was found
+    False (bool) = the data wasn't found """
+    cursor.execute("SELECT * FROM pendingDeletedAccounts WHERE user_email=?", (userEmail,))
+    results = cursor.fetchall()
+    if results:
+        return True
+    else:
+        return False
+
+
+def addToPendingDeletedAccounts(userEmail, confirmationKey):
+    """ Adds the given data (all strings) to the 'pendingDeletedAccounts' table in the DB """
+    cursor.execute("INSERT INTO pendingDeletedAccounts (user_email, confirmation_key) VALUES (?, ?)", (userEmail, confirmationKey))
+    connection.commit()
+
+
+def keysInPendingDeletedAccounts():
+    """ Returns all the keys that are in use by the 'pendingDeletedAccounts' table in the DB as a list of strings """
+    cursor.execute("SELECT * FROM pendingDeletedAccounts")
+    results = cursor.fetchall()
+    return [i[1] for i in results]
+
+
+##==================================================================================================================##
 ##===========================================  Pending password resets  ============================================##
 ##==================================================================================================================##
 
@@ -197,11 +243,16 @@ def addUser(userEmail, userPassword):
         return True
 
 
-def deleteUser(userEmail, userPassword):
-    """ Deletes the user corresponding to the provided email and password (both strings) from the database.
+def deleteUser(userEmail):
+    """ Deletes the user corresponding to the provided email (string) from the database.
         Returns True (bool) if it was successful or False (bool) if the user doesn't exist. """
-    if getUserData(email, password):
-        cursor.execute("DELETE FROM users WHERE user_email=? AND user_password=?", (userEmail, userPassword))
+    if userEmailInUse(userEmail):
+        cursor.execute("DELETE FROM users WHERE user_email=?", (userEmail,))
+        cursor.execute("DELETE FROM students WHERE user_email=?", (userEmail,))
+        cursor.execute("DELETE FROM pendingStudentRequests WHERE user_email=?", (userEmail,))
+        cursor.execute("DELETE FROM pendingAccounts WHERE user_email=?", (userEmail,))
+        cursor.execute("DELETE FROM pendingPasswordResets WHERE user_email=?", (userEmail,))
+        cursor.execute("DELETE FROM pendingDeletedAccounts WHERE user_email=?", (userEmail,))
         connection.commit()
         return True
     else:
@@ -235,3 +286,13 @@ def addStudent(studentEmail, userEmail):
         cursor.execute("INSERT INTO students (student_email, user_email) VALUES (?, ?)", (studentEmail, userEmail))
         connection.commit()
         return True
+
+def deleteStudent(studentEmail, userEmail):
+    """ Deletes the student-user affiliation corresponding to the provided emails (strings) in the database.
+        Returns True (bool) if it was successful or False (bool) if it wasn't found in the DB. """
+    if studentEmail in getStudents(userEmail):
+        cursor.execute("DELETE FROM students WHERE student_email=? AND user_email=?", (studentEmail, userEmail))
+        connection.commit()
+        return True
+    else:
+        return False

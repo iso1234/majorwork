@@ -30,6 +30,14 @@ def createDB():
                 user_email VARCHAR(60),
                 confirmation_key VARCHAR(60)
             ); """)
+        cur.execute("""CREATE TABLE pendingDeletedAccounts (
+                user_email VARCHAR(60),
+                confirmation_key VARCHAR(60)
+            ); """)
+        cur.execute("""CREATE TABLE studentCardIDs (
+                student_email VARCHAR(60),
+                card_id VARCHAR(60)
+            ); """)
         conn.commit()
         conn.close()
         print("Database created")

@@ -1,0 +1,18 @@
+{% include "header.html" %}
+
+<body>
+    {% include "menubar.html" %}
+	<h1>Delete Account</h1>
+    <p>Enter you email and password below to delete you account</p>
+    <p>After you click the 'delete account' button an email will be sent to the provided email address</p>
+    <p>Please use it to confirm the deletion of you account</p>
+	<form action="/deleteAccount" method="post">
+		<input type="email" placeholder="email" name="userEmail" required>
+		<input type="password" placeholder="password" name="userPassword" required>
+		<input type="submit" value="Delete account">
+	</form>
+	{% if error %}
+		<p>{{ error }}</p>
+	{% endif %}
+</body>
+</html>

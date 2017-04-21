@@ -93,9 +93,9 @@ def confirmAccount(key):
     # Check if that key has already been confirmed
     if key in sqlAPI.keysInPendingAccounts():
         sqlAPI.confirmPendingAccount(key)
-        flash("Successfully confirmed.")
+        flash("Account successfully confirmed.")
     else:
-        flash("Oops! This request has already been confirmed.")
+        flash("Oops! This request has already been confirmed or the associated account has been deleted.")
     return redirect(url_for("home"))
 
 
@@ -149,7 +149,7 @@ def confirmStudentRequest(key):
         sqlAPI.confirmPendingStudentRequest(key)
         flash("Successfully confirmed.")
     else:
-        flash("Oops! This request has already been confirmed.")
+        flash("Oops! This request has already been confirmed or the associated user has deleted their account.")
     return redirect(url_for("home"))
     
     
@@ -189,7 +189,7 @@ def resetPassword(key=""):
         if key in sqlAPI.keysInPendingPasswordResets():
             return renderTemplate("resetpassword.html", {"key": key, "messages": get_flashed_messages()})
         else:
-            flash("Oops! This password has already been reset.")
+            flash("Oops! This password has already been reset or the associated account has been deleted.")
             return redirect(url_for("home"))
     elif request.method == "POST":
         if request.form["resetPassword"] == request.form["resetRepeatPassword"]:
@@ -199,6 +199,48 @@ def resetPassword(key=""):
         else:
             flash("Oops! The passwords you entered don't match. Please enter two matching passwords.")
             return redirect(url_for("resetPassword") + "/" + request.form["resetKey"])
+            
+@app.route("/deleteAccount", methods=["GET", "POST"])
+@login_required
+def deleteAccunt():
+    error = None
+    if request.method == "POST":
+        if request.form["userEmail"] == session["userEmail"]:
+            if sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"]):
+                userEmail = request.form["userEmail"]
+                if not sqlAPI.alreadyInPendingDeletedAccounts(userEmail):
+                    # Send email
+                    randKey = randomKey.createRandomKey(sqlAPI.keysInPendingDeletedAccounts())
+                    emailSent = emailPackage.sendEmail(userEmail, userEmail, randKey, "d")
+                    if emailSent:
+                        sqlAPI.addToPendingDeletedAccounts(userEmail, randKey)
+                        flash("Email successfully sent! Visit your email to confirm the deletion of your account.")
+                        return redirect(url_for("home"))
+                    else:
+                        # Email didn't work
+                        error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
+                else:
+                    # Already pending request
+                    error = "Oops! You've already been sent a confirmation email to delete your account. You can use that email to delete you account."
+            else:
+                error = "Oops! Wrong username/password."
+        else:
+            error = "Oops! You must be logged into the account you want to delete."
+    return renderTemplate("deleteAccount.html", {"loginState": loginState(), "error": error})
+
+
+@app.route("/confirmDeleteAccount/<key>")
+def confirmDeleteAccount(key):
+    # Check if that key has already been confirmed
+    if key in sqlAPI.keysInPendingDeletedAccounts():
+        sqlAPI.confirmPendingDeletedAccount(key)
+        if "userEmail" in session:
+            session.pop("userEmail")
+        flash("Account successfully deleted.")
+        
+    else:
+        flash("Oops! This account has already been deleted.")
+    return redirect(url_for("home"))
         
 
 if __name__ == "__main__":
