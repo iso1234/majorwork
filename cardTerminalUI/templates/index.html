@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Home</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+	<p id="newData">greeneisaac@inaburrastudents.nsw.edu.au</div>
+	<div id="button">Exit</div>
+</body>
+<script>
+
+var dataSource = new EventSource("{{ url_for('getData') }}");
+dataSource.onmessage = function(e) {
+	$("#newData").text(e.data);
+};
+
+$("#button").click(function() {
+	console.log("ASDFGHJKL")
+	dataSource = ""
+	window.location.replace("/exit");
+});
+
+
+</script>
+<style>
+
+#newData {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 40px;
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  -webkit-transform: translate(-50%, 0);
+}
+
+#button {
+  border-radius: 6px;
+}
+
+#button {
+  font-family:arial,sans-serif;
+  font-size:20px;
+  text-transform:uppercase;
+  font-weight:bold;
+  text-align: center;
+  background: #26619c;
+  color: #fff;
+  position: absolute;
+  left: 50%;
+  padding: 10px;
+  bottom: 10%;
+  width: 100px;
+  -webkit-transform: translate(-50%, 0);
+}
+
+</style>
