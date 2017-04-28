@@ -1,1 +1,47 @@
 {% include "header.html" %}
+
+<body>
+{% include "menubar.html" %}
+
+<!-- Students -->
+<h1>Current students</h1>
+{% if studentInfo %}
+    <p>{% for name in studentInfo %}{{ name }}</p>
+        <ul>{% for i in studentInfo[name] %}<li>{{i}}</li>{% endfor %}</ul>
+    {% endfor %}
+{% else %}
+    <p>No Students have been registered</p>
+{% endif %}
+<h1>Register students</h1>
+<p>To register a student please enter their email</p>
+<p>After you click submit the student you entered will be sent a confirmation email</p>
+<form action="/mystudents" method="post">
+    <input type="email" placeholder="student email" name="studentEmail" required>
+    <input type="submit" value="Submit">
+</form>
+
+<!-- Logout -->
+<h1>Are you sure you want to log out?</h1>
+<form action="/logout" method="post">
+    <input type="submit" value="Yes"> # Remove these and add jquery button clicks
+</form>
+<form action="/" method="get">
+    <input type="submit" value="No"> # Remove these and add jquery button clicks
+</form>
+
+<!-- Delete account -->
+<h1>Delete Account</h1>
+<p>Enter you email and password below to delete you account</p>
+<p>After you click the 'delete account' button an email will be sent to the provided email address</p>
+<p>Please use it to confirm the deletion of you account</p>
+<form action="/deleteAccount" method="post">
+    <input type="email" placeholder="email" name="userEmail" required>
+    <input type="password" placeholder="password" name="userPassword" required>
+    <input type="submit" value="Delete account">
+</form>
+{% if error %}
+    <p>{{ error }}</p>
+{% endif %}
+
+</body>
+</html>

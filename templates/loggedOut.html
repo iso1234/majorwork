@@ -2,6 +2,11 @@
 
 <body>
 {% include "menubar.html" %}
+<h3>Messages</h3>
+{{ messages }}
+
+<h3>Errors</h3>
+{{ error }}
 <div class="container">
     	<div class="row">
 			<div class="col-md-6 col-md-offset-3">
@@ -20,12 +25,12 @@
 					<div class="panel-body">
 						<div class="row">
 							<div class="col-lg-12">
-								<form id="login-form" action="http://phpoll.com/login/process" method="post" role="form" style="display: block;">
+								<form id="login-form" action="/login" method="post" role="form" style="display: block;">
 									<div class="form-group">
-										<input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="">
+										<input type="email" name="userEmail" id="username" tabindex="1" class="form-control" placeholder="Email" value="" required>
 									</div>
 									<div class="form-group">
-										<input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password">
+										<input type="password" name="userPassword" id="password" tabindex="2" class="form-control" placeholder="Password" required>
 									</div>
 									<div class="form-group text-center">
 										<input type="checkbox" tabindex="3" class="" name="remember" id="remember">
@@ -42,24 +47,21 @@
 										<div class="row">
 											<div class="col-lg-12">
 												<div class="text-center">
-													<a href="http://phpoll.com/recover" tabindex="5" class="forgot-password">Forgot Password?</a>
+													<a href="/resetPassword" tabindex="5" class="forgot-password">Forgot Password?</a>
 												</div>
 											</div>
 										</div>
 									</div>
 								</form>
-								<form id="register-form" action="http://phpoll.com/register/process" method="post" role="form" style="display: none;">
+								<form id="register-form" action="/signup" method="post" role="form" style="display: none;">
 									<div class="form-group">
-										<input type="text" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value="">
+										<input type="email" name="signupEmail" id="username" tabindex="1" class="form-control" placeholder="Email" value="" required>
 									</div>
 									<div class="form-group">
-										<input type="email" name="email" id="email" tabindex="1" class="form-control" placeholder="Email Address" value="">
+										<input type="password" name="signupPassword" id="password" tabindex="2" class="form-control" placeholder="Password" required>
 									</div>
 									<div class="form-group">
-										<input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password">
-									</div>
-									<div class="form-group">
-										<input type="password" name="confirm-password" id="confirm-password" tabindex="2" class="form-control" placeholder="Confirm Password">
+										<input type="password" name="signupRepeatPassword" id="confirm-password" tabindex="2" class="form-control" placeholder="Confirm Password" required>
 									</div>
 									<div class="form-group">
 										<div class="row">
@@ -71,6 +73,12 @@
 								</form>
 							</div>
 						</div>
+                        <h4>Forgot or want to reset your password?</h4>
+                        <p>Enter your email below</p>
+                        <form action="/sendResetPasswordEmail" method="post">
+                    		<input type="email" placeholder="email" name="userEmail" required>
+                    		<input type="submit" value="Submit">
+                    	</form>
 					</div>
 				</div>
 			</div>

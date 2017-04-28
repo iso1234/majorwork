@@ -55,6 +55,7 @@ def logged_out_required(f):
 @app.route("/login", methods=["POST"])
 @logged_out_required
 def login():
+    global error
     if request.method == "POST":
         # Check if the provided credentials are valid
         validCredentials = sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"])
@@ -70,6 +71,7 @@ def login():
 @app.route("/signup", methods=["POST"])
 @logged_out_required
 def signup():
+    global error
     if request.method == "POST":
         signupEmail = request.form["signupEmail"]
         signupPassword = request.form["signupPassword"]
@@ -111,6 +113,7 @@ def confirmAccount(key):
 
 @app.route("/")
 def home():
+    global error
     if loginState():
         # Logged in
         return renderTemplate("loggedIn.html", {"messages": get_flashed_messages(), "loginState": loginState(), "studentInfo": sqlAPI.getStudentInfo(session["userEmail"]), "error": error})
@@ -132,6 +135,7 @@ def logout():
 @app.route("/mystudents", methods=["POST"])
 @login_required
 def mystudents():
+    global error
     currentStudents = sqlAPI.getStudents(session["userEmail"])
     if request.method == "POST":
         studentEmail = request.form["studentEmail"]
@@ -173,6 +177,7 @@ def confirmStudentRequest(key):
     
 @app.route("/sendResetPasswordEmail", methods=["GET", "POST"])
 def sendResetPasswordEmail():
+    global error
     if request.method == "POST":
         userEmail = request.form["userEmail"]
         # If the email is actually attached to an account
@@ -203,6 +208,7 @@ def sendResetPasswordEmail():
 @app.route("/resetPassword", methods=["POST"])    
 @app.route("/resetPassword/<key>", methods=["GET"])
 def resetPassword(key=""):
+    global error
     if request.method == "GET":
         if key in sqlAPI.keysInPendingPasswordResets():
             return renderTemplate("resetpassword.html", {"key": key, "messages": get_flashed_messages()})
@@ -221,6 +227,7 @@ def resetPassword(key=""):
 @app.route("/deleteAccount", methods=["GET", "POST"])
 @login_required
 def deleteAccount():
+    global error
     if request.method == "POST":
         if request.form["userEmail"] == session["userEmail"]:
             if sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"]):
