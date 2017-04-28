@@ -12,6 +12,14 @@ IP = "127.0.0.1"
 PORT = "5000"
 ADDRESS = IP + ":" + PORT
 
+error = ""
+
+def getError():
+    global error
+    output = error
+    error = ""
+    return output
+
 def loginState():
     """ Returns True if the user is logged in, otherwise it returns false """
     if 'userEmail' in session:
@@ -44,10 +52,9 @@ def logged_out_required(f):
     return decorated_function
     
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login", methods=["POST"])
 @logged_out_required
 def login():
-    error = None
     if request.method == "POST":
         # Check if the provided credentials are valid
         validCredentials = sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"])
@@ -57,13 +64,12 @@ def login():
             return redirect(url_for("home"))
         else:
             error = "Oops! Wrong username/password."
-    return renderTemplate("login.html", {"error": error, "loginState": loginState()})
+    return redirect(url_for("home")) #renderTemplate("login.html", {"error": error, "loginState": loginState()})
 
 
-@app.route("/signup", methods=["GET", "POST"])
+@app.route("/signup", methods=["POST"])
 @logged_out_required
 def signup():
-    error = None
     if request.method == "POST":
         signupEmail = request.form["signupEmail"]
         signupPassword = request.form["signupPassword"]
@@ -89,7 +95,7 @@ def signup():
                 error = "Oops! The username '{}' is already in use.".format(signupEmail)
         else:
             error = "Oops! The passwords you entered did not match"
-    return renderTemplate("signup.html", {"error": error, "loginState": loginState()})
+    return redirect(url_for("home")) #renderTemplate("signup.html", {"error": error, "loginState": loginState()})
 
 
 @app.route("/confirmAccount/<key>")
@@ -105,23 +111,27 @@ def confirmAccount(key):
 
 @app.route("/")
 def home():
-    return renderTemplate("index.html", {"messages": get_flashed_messages(), "loginState": loginState()})
+    if loginState():
+        # Logged in
+        return renderTemplate("loggedIn.html", {"messages": get_flashed_messages(), "loginState": loginState(), "studentInfo": sqlAPI.getStudentInfo(session["userEmail"]), "error": error})
+    else:
+        # Logged out
+        return renderTemplate("loggedOut.html", {"messages": get_flashed_messages(), "loginState": loginState(), "error": error})
     
 
-@app.route("/logout", methods=["GET", "POST"])
+@app.route("/logout", methods=["POST"])
 @login_required
 def logout():
     if request.method == "POST":
         session.pop("userEmail")
         return redirect(url_for("home"))
-    return renderTemplate("logout.html", {"loginState": loginState()})
+    return redirect(url_for("home")) #renderTemplate("logout.html", {"loginState": loginState()})
 
 
 
-@app.route("/mystudents", methods=["GET", "POST"])
+@app.route("/mystudents", methods=["POST"])
 @login_required
 def mystudents():
-    error = None
     currentStudents = sqlAPI.getStudents(session["userEmail"])
     if request.method == "POST":
         studentEmail = request.form["studentEmail"]
@@ -147,7 +157,7 @@ def mystudents():
         else:
             # Already registered
             error = "Oops! You've already registered the student with the email address {}.".format(studentEmail)
-    return renderTemplate("mystudents.html", {"loginState": loginState(), "studentInfo": sqlAPI.getStudentInfo(session["userEmail"]), "error": error})
+    return redirect(url_for("home"))
 
 
 @app.route("/confirmStudentRequest/<key>")
@@ -161,7 +171,7 @@ def confirmStudentRequest(key):
     return redirect(url_for("home"))
     
     
-@app.route("/sendResetPasswordEmail", methods=["POST"])
+@app.route("/sendResetPasswordEmail", methods=["GET", "POST"])
 def sendResetPasswordEmail():
     if request.method == "POST":
         userEmail = request.form["userEmail"]
@@ -210,8 +220,7 @@ def resetPassword(key=""):
             
 @app.route("/deleteAccount", methods=["GET", "POST"])
 @login_required
-def deleteAccunt():
-    error = None
+def deleteAccount():
     if request.method == "POST":
         if request.form["userEmail"] == session["userEmail"]:
             if sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"]):
@@ -234,7 +243,7 @@ def deleteAccunt():
                 error = "Oops! Wrong username/password."
         else:
             error = "Oops! You must be logged into the account you want to delete."
-    return renderTemplate("deleteAccount.html", {"loginState": loginState(), "error": error})
+    return redirect(url_for("home")) #renderTemplate("deleteAccount.html", {"loginState": loginState(), "error": error})
 
 
 @app.route("/confirmDeleteAccount/<key>")
