@@ -12,14 +12,6 @@ IP = "127.0.0.1"
 PORT = "5000"
 ADDRESS = IP + ":" + PORT
 
-error = ""
-
-def getError():
-    global error
-    output = error
-    error = ""
-    return output
-
 def loginState():
     """ Returns True if the user is logged in, otherwise it returns false """
     if 'userEmail' in session:
@@ -51,53 +43,57 @@ def logged_out_required(f):
             return redirect(url_for('logout'))
     return decorated_function
     
+    
+@app.route("/")
+def home():
+    if loginState():
+        # Logged in
+        return renderTemplate("loggedIn.html", {"message": get_flashed_messages(), "loginState": loginState(), "studentInfo": sqlAPI.getStudentInfo(session["userEmail"])})
+    else:
+        # Logged out
+        return renderTemplate("loggedOut.html", {"message": get_flashed_messages(), "loginState": loginState()})
+    
 
 @app.route("/login", methods=["POST"])
 @logged_out_required
 def login():
-    global error
-    if request.method == "POST":
-        # Check if the provided credentials are valid
-        validCredentials = sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"])
-        if validCredentials:
-            session["userEmail"] = request.form["userEmail"]
-            flash("You were successfully logged in!")
-            return redirect(url_for("home"))
-        else:
-            error = "Oops! Wrong username/password."
-    return redirect(url_for("home")) #renderTemplate("login.html", {"error": error, "loginState": loginState()})
+    # Check if the provided credentials are valid
+    validCredentials = sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"])
+    if validCredentials:
+        session["userEmail"] = request.form["userEmail"]
+        flash("success:You were successfully logged in!")
+    else:
+        flash("danger:Oops! Wrong username/password.")
+    return redirect(url_for("home"))
 
 
 @app.route("/signup", methods=["POST"])
 @logged_out_required
 def signup():
-    global error
-    if request.method == "POST":
-        signupEmail = request.form["signupEmail"]
-        signupPassword = request.form["signupPassword"]
-        signupRepeatPassword = request.form["signupRepeatPassword"]
-        # Verify the data that was provided by the user and send a confirmation email
-        if signupPassword == signupRepeatPassword:
-            if not sqlAPI.userEmailInUse(signupEmail):
-                if not sqlAPI.alreadyInPendingAccounts(signupEmail):
-                    # Send email
-                    randKey = randomKey.createRandomKey(sqlAPI.keysInPendingAccounts())
-                    emailSent = emailPackage.sendEmail(signupEmail, signupEmail, randKey, "a", ADDRESS)
-                    if emailSent:
-                        sqlAPI.addToPendingAccounts(signupEmail, randKey, signupPassword)
-                        flash("Email successfully sent! Please check your email to confirm your account.")
-                        return redirect(url_for("home"))
-                    else:
-                        # Email didn't work
-                        error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
+    signupEmail = request.form["signupEmail"]
+    signupPassword = request.form["signupPassword"]
+    signupRepeatPassword = request.form["signupRepeatPassword"]
+    # Verify the data that was provided by the user and send a confirmation email
+    if signupPassword == signupRepeatPassword:
+        if not sqlAPI.userEmailInUse(signupEmail):
+            if not sqlAPI.alreadyInPendingAccounts(signupEmail):
+                # Send email
+                randKey = randomKey.createRandomKey(sqlAPI.keysInPendingAccounts())
+                emailSent = emailPackage.sendEmail(signupEmail, signupEmail, randKey, "a", ADDRESS)
+                if emailSent:
+                    sqlAPI.addToPendingAccounts(signupEmail, randKey, signupPassword)
+                    flash("success:Email successfully sent! Please use the email sent to '{}' to confirm your account.".format(signupEmail))
                 else:
-                    # Already pending request
-                    error = "Oops! A confirmation email has been sent to '{}', please use it to confirm your account and login.".format(signupEmail)
-            else: # If the username was already in use
-                error = "Oops! The username '{}' is already in use.".format(signupEmail)
-        else:
-            error = "Oops! The passwords you entered did not match"
-    return redirect(url_for("home")) #renderTemplate("signup.html", {"error": error, "loginState": loginState()})
+                    # Email didn't work
+                    flash("danger:Oops! The confimation email could not be sent to '{}'. Please check the email address and try again later.".format(signupEmail))
+            else:
+                # Already pending request
+                flash("danger:Oops! A confirmation email has already been sent to '{}', please use it to confirm your account.".format(signupEmail))
+        else: # If the username was already in use
+            flash("danger:Oops! The username '{}' is already in use.".format(signupEmail))
+    else:
+        flash("danger:Oops! The passwords entered did not match")
+    return redirect(url_for("home"))
 
 
 @app.route("/confirmAccount/<key>")
@@ -105,62 +101,45 @@ def confirmAccount(key):
     # Check if that key has already been confirmed
     if key in sqlAPI.keysInPendingAccounts():
         sqlAPI.confirmPendingAccount(key)
-        flash("Account successfully confirmed.")
+        flash("success:Account successfully confirmed.")
     else:
-        flash("Oops! This request has already been confirmed or the associated account has been deleted.")
+        flash("danger:Oops! This account has already been confirmed.")
     return redirect(url_for("home"))
-
-
-@app.route("/")
-def home():
-    global error
-    if loginState():
-        # Logged in
-        return renderTemplate("loggedIn.html", {"messages": get_flashed_messages(), "loginState": loginState(), "studentInfo": sqlAPI.getStudentInfo(session["userEmail"]), "error": error})
-    else:
-        # Logged out
-        return renderTemplate("loggedOut.html", {"messages": get_flashed_messages(), "loginState": loginState(), "error": error})
     
 
 @app.route("/logout", methods=["POST"])
 @login_required
 def logout():
-    if request.method == "POST":
-        session.pop("userEmail")
-        return redirect(url_for("home"))
-    return redirect(url_for("home")) #renderTemplate("logout.html", {"loginState": loginState()})
-
+    session.pop("userEmail")
+    return redirect(url_for("home"))
 
 
 @app.route("/mystudents", methods=["POST"])
 @login_required
 def mystudents():
-    global error
     currentStudents = sqlAPI.getStudents(session["userEmail"])
-    if request.method == "POST":
-        studentEmail = request.form["studentEmail"]
-        if studentEmail not in currentStudents:
-            if not sqlAPI.alreadyInPendingStudentRequests(studentEmail, session["userEmail"]):
-                if sqlAPI.getStudentCardID(studentEmail):
-                    # Send email
-                    randKey = randomKey.createRandomKey(sqlAPI.keysInPendingStudentRequests())
-                    emailSent = emailPackage.sendEmail(studentEmail, session['userEmail'], randKey, "s", ADDRESS)
-                    if emailSent:
-                        sqlAPI.addToPendingStudentRequests(studentEmail, randKey, session['userEmail'])
-                        flash("Email successfully sent! Please get the student that was registered to check their email.")
-                        return redirect(url_for("home"))
-                    else:
-                        # Email didn't work
-                        error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
+    studentEmail = request.form["studentEmail"]
+    if studentEmail not in currentStudents:
+        if not sqlAPI.alreadyInPendingStudentRequests(studentEmail, session["userEmail"]):
+            if sqlAPI.getStudentCardID(studentEmail):
+                # Send email
+                randKey = randomKey.createRandomKey(sqlAPI.keysInPendingStudentRequests())
+                emailSent = emailPackage.sendEmail(studentEmail, session['userEmail'], randKey, "s", ADDRESS)
+                if emailSent:
+                    sqlAPI.addToPendingStudentRequests(studentEmail, randKey, session['userEmail'])
+                    flash("success:Email successfully sent! Please use the email sent to '{}' to allow yourself access to this students information.".format(studentEmail))
                 else:
-                     # Student isn't registered in the system
-                    error = "Oops! That student isn't registered with our system."
+                    # Email didn't work
+                    flash("danger:Oops! The confimation email could not be sent to '{}'. Please check the email address and try again later.".format(studentEmail))
             else:
-                # Already pending request
-                error = "Oops! You've already sent a request email to the student with the email address {}.".format(studentEmail)
+                 # Student isn't registered in the system
+                flash("danger:Oops! '{}' isn't registered with our system.".format(studentEmail))
         else:
-            # Already registered
-            error = "Oops! You've already registered the student with the email address {}.".format(studentEmail)
+            # Already pending request
+            flash("danger:Oops! You've already sent a request email to '{}'.".format(studentEmail))
+    else:
+        # Already registered
+        flash("danger:Oops! You've already registered the student '{}'.".format(studentEmail))
     return redirect(url_for("home"))
 
 
@@ -169,88 +148,82 @@ def confirmStudentRequest(key):
     # Check if that key has already been confirmed
     if key in sqlAPI.keysInPendingStudentRequests():
         sqlAPI.confirmPendingStudentRequest(key)
-        flash("Successfully confirmed.")
+        flash("success:Student successfully confirmed.")
     else:
-        flash("Oops! This request has already been confirmed or the associated user has deleted their account.")
+        flash("danger:Oops! That request has already been confirmed or the associated user has deleted their account.")
     return redirect(url_for("home"))
     
     
-@app.route("/sendResetPasswordEmail", methods=["GET", "POST"])
+@app.route("/sendResetPasswordEmail", methods=["POST"])
 def sendResetPasswordEmail():
-    global error
-    if request.method == "POST":
-        userEmail = request.form["userEmail"]
-        # If the email is actually attached to an account
-        if sqlAPI.userEmailInUse(userEmail):
-            # If a reset email hasn't already been sent
-            if not sqlAPI.alreadyInPendingPasswordResets(userEmail):
-                # Send email
-                randKey = randomKey.createRandomKey(sqlAPI.keysInPendingPasswordResets())
-                emailSent = emailPackage.sendEmail(userEmail, userEmail, randKey, "r", ADDRESS)
-                if emailSent:
-                    sqlAPI.addToPendingPasswordResets(userEmail, randKey)
-                    flash("Email successfully sent! Please check your email address.")
-                    return redirect(url_for("home"))
-                else:
-                    # Email didn't work
-                    error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
+    userEmail = request.form["userEmail"]
+    # If the email is actually attached to an account
+    if sqlAPI.userEmailInUse(userEmail):
+        # If a reset email hasn't already been sent
+        if not sqlAPI.alreadyInPendingPasswordResets(userEmail):
+            # Send email
+            randKey = randomKey.createRandomKey(sqlAPI.keysInPendingPasswordResets())
+            emailSent = emailPackage.sendEmail(userEmail, userEmail, randKey, "r", ADDRESS)
+            if emailSent:
+                sqlAPI.addToPendingPasswordResets(userEmail, randKey)
+                flash("success:Email successfully sent! Please use the email sent to '{}' to reset your password.".format(userEmail))
             else:
-                flash("Oops! A reset password email has already been sent to '{}', please use it to reset your password.".format(userEmail))
+                # Email didn't work
+                flash("danger:Oops! The confimation email could not be sent to '{}'. Please check the email address and try again later.".format(userEmail))
         else:
-            # If the email is awaiting confirmation
-            if sqlAPI.alreadyInPendingAccounts(userEmail):
-                flash("Oops! A confirmation email has been sent to '{}', please use it to confirm your account and login.".format(userEmail))
-            else:
-                flash("Oops! That email isn't associated with an account, please enter the email associated with your account or register an account.")
+            flash("danger:Oops! A reset password email has already been sent to '{}'. Please use it to reset your password.".format(userEmail))
+    else:
+        # If the email is awaiting confirmation
+        if sqlAPI.alreadyInPendingAccounts(userEmail):
+            flash("danger:Oops! A confirmation email has already been sent to '{}', please use it to confirm your account and login.".format(userEmail))
+        else:
+            flash("danger:Oops! The email '{}' isn't associated with an account, please enter the email associated with your account or register an account.".format(userEmail))
     return redirect(url_for("home"))
     
 
 @app.route("/resetPassword", methods=["POST"])    
 @app.route("/resetPassword/<key>", methods=["GET"])
 def resetPassword(key=""):
-    global error
     if request.method == "GET":
         if key in sqlAPI.keysInPendingPasswordResets():
-            return renderTemplate("resetpassword.html", {"key": key, "messages": get_flashed_messages()})
+            return renderTemplate("resetpassword.html", {"key": key, "message": get_flashed_messages()})
         else:
-            flash("Oops! This password has already been reset or the associated account has been deleted.")
+            flash("danger:Oops! This password has already been reset or the associated account has been deleted.")
             return redirect(url_for("home"))
     elif request.method == "POST":
         if request.form["resetPassword"] == request.form["resetRepeatPassword"]:
             sqlAPI.resetPassword(request.form["resetKey"], request.form["resetPassword"])
-            flash("Password successfully reset.")
+            flash("success:Password successfully reset.")
             return redirect(url_for("home"))
         else:
-            flash("Oops! The passwords you entered don't match. Please enter two matching passwords.")
+            flash("danger:Oops! The passwords you entered don't match. Please enter two matching passwords.")
             return redirect(url_for("resetPassword") + "/" + request.form["resetKey"])
-            
-@app.route("/deleteAccount", methods=["GET", "POST"])
+
+
+@app.route("/deleteAccount", methods=["POST"])
 @login_required
 def deleteAccount():
-    global error
-    if request.method == "POST":
-        if request.form["userEmail"] == session["userEmail"]:
-            if sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"]):
-                userEmail = request.form["userEmail"]
-                if not sqlAPI.alreadyInPendingDeletedAccounts(userEmail):
-                    # Send email
-                    randKey = randomKey.createRandomKey(sqlAPI.keysInPendingDeletedAccounts())
-                    emailSent = emailPackage.sendEmail(userEmail, userEmail, randKey, "d", ADDRESS)
-                    if emailSent:
-                        sqlAPI.addToPendingDeletedAccounts(userEmail, randKey)
-                        flash("Email successfully sent! Visit your email to confirm the deletion of your account.")
-                        return redirect(url_for("home"))
-                    else:
-                        # Email didn't work
-                        error = "Oops! The confimation email could not be sent. Please check the email address and try again later."
+    if request.form["userEmail"] == session["userEmail"]:
+        if sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"]):
+            userEmail = request.form["userEmail"]
+            if not sqlAPI.alreadyInPendingDeletedAccounts(userEmail):
+                # Send email
+                randKey = randomKey.createRandomKey(sqlAPI.keysInPendingDeletedAccounts())
+                emailSent = emailPackage.sendEmail(userEmail, userEmail, randKey, "d", ADDRESS)
+                if emailSent:
+                    sqlAPI.addToPendingDeletedAccounts(userEmail, randKey)
+                    flash("success:Email successfully sent. Visit the email '{}' to confirm the deletion of your account.".format(userEmail))
                 else:
-                    # Already pending request
-                    error = "Oops! You've already been sent a confirmation email to delete your account. You can use that email to delete you account."
+                    # Email didn't work
+                    flash("danger:Oops! The confimation email could not be sent. to '{}' Please check the email address and try again later.".format(userEmail))
             else:
-                error = "Oops! Wrong username/password."
+                # Already pending request
+                flash("danger:Oops! You've already been sent a confirmation email to '{}'. Please use that email to delete you account.".format(userEmail))
         else:
-            error = "Oops! You must be logged into the account you want to delete."
-    return redirect(url_for("home")) #renderTemplate("deleteAccount.html", {"loginState": loginState(), "error": error})
+            flash("danger:Oops! Wrong username/password.")
+    else:
+        flash("danger:Oops! You must be logged into the account you want to delete.")
+    return redirect(url_for("home"))
 
 
 @app.route("/confirmDeleteAccount/<key>")
@@ -260,10 +233,10 @@ def confirmDeleteAccount(key):
         sqlAPI.confirmPendingDeletedAccount(key)
         if "userEmail" in session:
             session.pop("userEmail")
-        flash("Account successfully deleted.")
+        flash("success:Account successfully deleted.")
         
     else:
-        flash("Oops! This account has already been deleted.")
+        flash("danger:Oops! This account has already been deleted.")
     return redirect(url_for("home"))
         
 

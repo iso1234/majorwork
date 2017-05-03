@@ -3,6 +3,13 @@
 <body>
 {% include "menubar.html" %}
 
+<!-- Alerts -->
+{% if message %}
+<div class="{{ 'alert alert-' + message[0].split(":")[0] }}" role="alert">
+    {{ message[0].split(":")[1] }}
+</div>
+{% endif %}
+
 <!-- Students -->
 <h1>Current students</h1>
 {% if studentInfo %}

@@ -2,18 +2,23 @@
 
 <body>
 {% include "menubar.html" %}
-<h3>Messages</h3>
-{{ messages }}
 
-<h3>Errors</h3>
-{{ error }}
+
+<!-- This front end was inspired by code from http://bootsnipp.com/snippets/featured/login-and-register-tabbed-form -->
+
 <div class="container">
     	<div class="row">
 			<div class="col-md-6 col-md-offset-3">
+                <!-- Alerts -->
+                {% if message %}
+                <div class="{{ 'alert alert-' + message[0].split(":")[0] }}" style="margin-top: -50px" role="alert">
+                    {{ message[0].split(":")[1] }}
+                </div>
+                {% endif %}
 				<div class="panel panel-login">
 					<div class="panel-heading">
 						<div class="row">
-							<div class="col-xs-6">
+							<div class="col-xs-6" style="border-right: 1px solid #BDBDBD">
 								<a href="#" class="active" id="login-form-link">Login</a>
 							</div>
 							<div class="col-xs-6">
@@ -32,27 +37,25 @@
 									<div class="form-group">
 										<input type="password" name="userPassword" id="password" tabindex="2" class="form-control" placeholder="Password" required>
 									</div>
-									<div class="form-group text-center">
-										<input type="checkbox" tabindex="3" class="" name="remember" id="remember">
-										<label for="remember"> Remember Me</label>
-									</div>
 									<div class="form-group">
 										<div class="row">
 											<div class="col-sm-6 col-sm-offset-3">
-												<input type="submit" name="login-submit" id="login-submit" tabindex="4" class="form-control btn btn-login" value="Log In">
-											</div>
-										</div>
-									</div>
-									<div class="form-group">
-										<div class="row">
-											<div class="col-lg-12">
-												<div class="text-center">
-													<a href="/resetPassword" tabindex="5" class="forgot-password">Forgot Password?</a>
-												</div>
+												<input type="submit" name="login-submit" id="login-submit" tabindex="3" class="form-control btn btn-login" value="Log In">
 											</div>
 										</div>
 									</div>
 								</form>
+                                <div class="form-group" id="reset-password">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <p>Forgot or want to reset your password? Enter your email below</p>
+                                            <form action="/sendResetPasswordEmail" method="post" class="password-reset form-inline">
+                                                <input type="email" name="userEmail" tabindex="4" class="form-control col-sm-10" placeholder="Email" value="" required>
+                                                <input type="submit" tabindex="5" value="Submit" class="btn btn-default btn-sm pull-right col-sm10-2">
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
 								<form id="register-form" action="/signup" method="post" role="form" style="display: none;">
 									<div class="form-group">
 										<input type="email" name="signupEmail" id="username" tabindex="1" class="form-control" placeholder="Email" value="" required>
@@ -73,12 +76,6 @@
 								</form>
 							</div>
 						</div>
-                        <h4>Forgot or want to reset your password?</h4>
-                        <p>Enter your email below</p>
-                        <form action="/sendResetPasswordEmail" method="post">
-                    		<input type="email" placeholder="email" name="userEmail" required>
-                    		<input type="submit" value="Submit">
-                    	</form>
 					</div>
 				</div>
 			</div>
@@ -90,7 +87,7 @@
 .container {
     position: absolute;
     left: 50%;
-    top: 28%;
+    padding-top: 50px;
     -webkit-transform: translate(-50%, 0);
 }
 .panel-login {
@@ -107,7 +104,7 @@
 }
 .panel-login>.panel-heading a{
 	text-decoration: none;
-	color: #666;
+	color: #BDBDBD;
 	font-weight: bold;
 	font-size: 15px;
 	-webkit-transition: all 0.1s linear;
@@ -115,7 +112,7 @@
 	transition: all 0.1s linear;
 }
 .panel-login>.panel-heading a.active{
-	color: #029f5b;
+	color: #424242;
 	font-size: 18px;
 }
 .panel-login>.panel-heading hr{
@@ -136,6 +133,12 @@
 	-webkit-transition: all 0.1s linear;
 	-moz-transition: all 0.1s linear;
 	transition: all 0.1s linear;
+}
+.password-reset input:not([type='submit']) {
+    height: 30px;
+    width: calc(100% * 10/12);
+}.password-reset input[type='submit'] {
+    width: calc(100% - calc(100% * 10/12));
 }
 .panel-login input:hover,
 .panel-login input:focus {
@@ -197,6 +200,7 @@ $(function() {
 
     $('#login-form-link').click(function(e) {
 		$("#login-form").delay(100).fadeIn(100);
+        $("#reset-password").delay(100).fadeIn(100);
  		$("#register-form").fadeOut(100);
 		$('#register-form-link').removeClass('active');
 		$(this).addClass('active');
@@ -205,6 +209,7 @@ $(function() {
 	$('#register-form-link').click(function(e) {
 		$("#register-form").delay(100).fadeIn(100);
  		$("#login-form").fadeOut(100);
+        $("#reset-password").fadeOut(100);
 		$('#login-form-link').removeClass('active');
 		$(this).addClass('active');
 		e.preventDefault();

@@ -1,17 +1,27 @@
 <nav class="navbar navbar-default" role="navigation">
   <!-- Brand and toggle get grouped for better mobile display -->
   <div class="navbar-header">
-    <a class="navbar-brand">LAPIS</a>
+    <a class="navbar-brand"><img class="img-responsive" width="30px" src="static/LapisIcon.png"/></a>
   </div>
 </nav>
+
+<h1>LAPIS</h1>
 
 <style>
 .navbar {
     border-top: 3px solid #03A9F4;
     border-radius: 0px;
 }
+.navbar {
+    position: relative;
+}
+.navbar-brand {
+    position: absolute;
+    up: 50%;
+    left: -6px;
+    margin-top: -7.5px !important;  /* 50% of your logo width */
+    display: block;
+}
 </style>
-
-
 </body>
 </html>
