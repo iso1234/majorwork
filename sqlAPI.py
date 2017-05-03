@@ -105,6 +105,12 @@ def keysInPendingPasswordResets():
     cursor.execute("SELECT * FROM pendingPasswordResets")
     results = cursor.fetchall()
     return [i[1] for i in results]
+    
+
+def deletePendingPasswordReset(userEmail):
+    """ Deletes any pending password resets associated with the provided userEmail """
+    cursor.execute("DELETE FROM pendingPasswordResets WHERE user_email=?", (userEmail,))
+    connection.commit()
 
 
 ##==================================================================================================================##

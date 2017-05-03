@@ -59,8 +59,12 @@ def home():
 def login():
     # Check if the provided credentials are valid
     validCredentials = sqlAPI.userInDB(request.form["userEmail"], request.form["userPassword"])
+    userEmail = request.form["userEmail"]
     if validCredentials:
-        session["userEmail"] = request.form["userEmail"]
+        session["userEmail"] = userEmail
+        # Delete any pending password requests from the db
+        if sqlAPI.alreadyInPendingPasswordResets(userEmail):
+            sqlAPI.deletePendingPasswordReset(userEmail)
         flash("success:You were successfully logged in!")
     else:
         flash("danger:Oops! Wrong username/password.")
@@ -88,11 +92,11 @@ def signup():
                     flash("danger:Oops! The confimation email could not be sent to '{}'. Please check the email address and try again later.".format(signupEmail))
             else:
                 # Already pending request
-                flash("danger:Oops! A confirmation email has already been sent to '{}', please use it to confirm your account.".format(signupEmail))
+                flash("danger:Oops! A confirmation email has already been sent to '{}', please use it to confirm your account.:Resend email".format(signupEmail))
         else: # If the username was already in use
             flash("danger:Oops! The username '{}' is already in use.".format(signupEmail))
     else:
-        flash("danger:Oops! The passwords entered did not match")
+        flash("danger:Oops! The passwords entered did not match.")
     return redirect(url_for("home"))
 
 
@@ -136,7 +140,7 @@ def mystudents():
                 flash("danger:Oops! '{}' isn't registered with our system.".format(studentEmail))
         else:
             # Already pending request
-            flash("danger:Oops! You've already sent a request email to '{}'.".format(studentEmail))
+            flash("danger:Oops! You've already sent a request email to '{}'.:Resend email".format(studentEmail))
     else:
         # Already registered
         flash("danger:Oops! You've already registered the student '{}'.".format(studentEmail))
@@ -171,11 +175,11 @@ def sendResetPasswordEmail():
                 # Email didn't work
                 flash("danger:Oops! The confimation email could not be sent to '{}'. Please check the email address and try again later.".format(userEmail))
         else:
-            flash("danger:Oops! A reset password email has already been sent to '{}'. Please use it to reset your password.".format(userEmail))
+            flash("danger:Oops! A reset password email has already been sent to '{}'. Please use it to reset your password.:Resend email".format(userEmail))
     else:
         # If the email is awaiting confirmation
         if sqlAPI.alreadyInPendingAccounts(userEmail):
-            flash("danger:Oops! A confirmation email has already been sent to '{}', please use it to confirm your account and login.".format(userEmail))
+            flash("danger:Oops! A confirmation email has already been sent to '{}', please use it to confirm your account and login.:Resend email".format(userEmail))
         else:
             flash("danger:Oops! The email '{}' isn't associated with an account, please enter the email associated with your account or register an account.".format(userEmail))
     return redirect(url_for("home"))
@@ -218,7 +222,7 @@ def deleteAccount():
                     flash("danger:Oops! The confimation email could not be sent. to '{}' Please check the email address and try again later.".format(userEmail))
             else:
                 # Already pending request
-                flash("danger:Oops! You've already been sent a confirmation email to '{}'. Please use that email to delete you account.".format(userEmail))
+                flash("danger:Oops! You've already been sent a confirmation email to '{}'. Please use that email to delete you account.:Resend email".format(userEmail))
         else:
             flash("danger:Oops! Wrong username/password.")
     else:

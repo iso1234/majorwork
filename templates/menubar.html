@@ -5,7 +5,11 @@
   </div>
 </nav>
 
+{% if loginState == False %}
 <h1>LAPIS</h1>
+<p id="note"><small>Year 12 major work by Isaac Greene</small><p>
+{%  endfor %}
+
 
 <style>
 .navbar {
@@ -19,8 +23,33 @@
     position: absolute;
     up: 50%;
     left: -6px;
-    margin-top: -7.5px !important;  /* 50% of your logo width */
+    margin-top: -7.5px !important;
     display: block;
+}
+h1 {
+    margin-top: 30px;
+    margin-bottom: 10px;
+    font-size: 70px;
+    display: table;
+    white-space: nowrap;
+    border-spacing: 25px 0;
+}
+h1:before, h1:after {
+  content: "";
+  display: table-cell;
+  width: 50%;
+  background: -webkit-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: -moz-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: -ms-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: linear-gradient(#aaa, #aaa) repeat-x left center;
+  background-size: 1px 1px;
+}
+body {
+    font-family: sans-serif;
+}
+#note {
+    font-style: italic;
+    text-align: center;
 }
 </style>
 </body>
