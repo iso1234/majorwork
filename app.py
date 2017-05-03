@@ -4,6 +4,7 @@ import sqlAPI
 import emailPackage
 import randomKey
 from templateEngine import renderTemplate
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key="v\xf1\xb5\tr\xe2\xb3\x14!g"
@@ -85,7 +86,7 @@ def signup():
                 randKey = randomKey.createRandomKey(sqlAPI.keysInPendingAccounts())
                 emailSent = emailPackage.sendEmail(signupEmail, signupEmail, randKey, "a", ADDRESS)
                 if emailSent:
-                    sqlAPI.addToPendingAccounts(signupEmail, randKey, signupPassword)
+                    sqlAPI.addToPendingAccounts(signupEmail, randKey, generate_password_hash(signupPassword))
                     flash("success:Email successfully sent! Please use the email sent to '{}' to confirm your account.".format(signupEmail))
                 else:
                     # Email didn't work
@@ -196,7 +197,7 @@ def resetPassword(key=""):
             return redirect(url_for("home"))
     elif request.method == "POST":
         if request.form["resetPassword"] == request.form["resetRepeatPassword"]:
-            sqlAPI.resetPassword(request.form["resetKey"], request.form["resetPassword"])
+            sqlAPI.resetPassword(request.form["resetKey"], generate_password_hash(request.form["resetPassword"]))
             flash("success:Password successfully reset.")
             return redirect(url_for("home"))
         else:

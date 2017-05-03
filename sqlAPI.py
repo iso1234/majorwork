@@ -2,6 +2,7 @@
 import sqlite3
 import os
 import time
+from werkzeug.security import generate_password_hash, check_password_hash
 
 connection = sqlite3.connect("main.db", check_same_thread=False)
 cursor = connection.cursor()
@@ -230,12 +231,9 @@ def userInDB(userEmail, userPassword):
     Output:
     True (bool) = that set of data was found
     False (bool) = that set of data wasn't found """
-    cursor.execute("SELECT * FROM users WHERE user_email=? AND user_password=?", (userEmail, userPassword))
+    cursor.execute("SELECT * FROM users WHERE user_email=?", (userEmail,))
     results = cursor.fetchall()
-    if results:
-        return True
-    else:
-        return False
+    return check_password_hash(results[0][1], userPassword)
 
 
 def addUser(userEmail, userPassword):
