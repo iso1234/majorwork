@@ -3,52 +3,86 @@
 <body>
 {% include "menubar.html" %}
 
-<!-- Alerts -->
-{% if message %}
-<div class="{{ 'alert alert-' + message[0].split(":")[0] }}" role="alert">
-    {{ message[0].split(":")[1] }}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Alerts -->
+            {% if message %}
+            <div class="{{ 'alert alert-' + message[0].split(":")[0] }}" role="alert">
+                {{ message[0].split(":")[1] }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <!-- Students -->
+            <div class="table">
+                <h1>Current students</h1>
+                {% if not studentInfo %}
+                    <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                        {% for i in range(100) %}
+                        <tr>
+                            <td>First Name</td>
+                            <td>Last Name</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tbody>
+                    </table>
+                    <p>{% for name in studentInfo %}{{ name }}</p>
+                        <ul>{% for i in studentInfo[name] %}<li>{{i}}</li>{% endfor %}</ul>
+                    {% endfor %}
+                {% else %}
+                    <p>No Students have been registered</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <h1>Register students</h1>
+            <p>To register a student please enter their email</p>
+            <p>After you click submit the student you entered will be sent a confirmation email</p>
+            <form action="/mystudents" method="post">
+                <input type="email" placeholder="student email" name="studentEmail" required>
+                <input type="submit" value="Submit">
+            </form>
+
+            <!-- Logout -->
+            <form action="/logout" method="post">
+                <input class="btn btn-primary" type="submit" value="Logout">
+            </form>
+
+
+            <!-- Delete account -->
+            <h1>Delete Account</h1>
+            <p>Enter you email and password below to delete you account</p>
+            <p>After you click the 'delete account' button an email will be sent to the provided email address</p>
+            <p>Please use it to confirm the deletion of you account</p>
+            <form action="/deleteAccount" method="post">
+                <input type="email" placeholder="email" name="userEmail" required>
+                <input type="password" placeholder="password" name="userPassword" required>
+                <input class="btn btn-danger" type="submit" value="Delete account">
+            </form>
+            {% if error %}
+                <p>{{ error }}</p>
+            {% endif %}
+        </div>
+    </div>
 </div>
-{% endif %}
-
-<!-- Students -->
-<h1>Current students</h1>
-{% if studentInfo %}
-    <p>{% for name in studentInfo %}{{ name }}</p>
-        <ul>{% for i in studentInfo[name] %}<li>{{i}}</li>{% endfor %}</ul>
-    {% endfor %}
-{% else %}
-    <p>No Students have been registered</p>
-{% endif %}
-<h1>Register students</h1>
-<p>To register a student please enter their email</p>
-<p>After you click submit the student you entered will be sent a confirmation email</p>
-<form action="/mystudents" method="post">
-    <input type="email" placeholder="student email" name="studentEmail" required>
-    <input type="submit" value="Submit">
-</form>
-
-<!-- Logout -->
-<h1>Are you sure you want to log out?</h1>
-<form action="/logout" method="post">
-    <input type="submit" value="Yes"> # Remove these and add jquery button clicks
-</form>
-<form action="/" method="get">
-    <input type="submit" value="No"> # Remove these and add jquery button clicks
-</form>
-
-<!-- Delete account -->
-<h1>Delete Account</h1>
-<p>Enter you email and password below to delete you account</p>
-<p>After you click the 'delete account' button an email will be sent to the provided email address</p>
-<p>Please use it to confirm the deletion of you account</p>
-<form action="/deleteAccount" method="post">
-    <input type="email" placeholder="email" name="userEmail" required>
-    <input type="password" placeholder="password" name="userPassword" required>
-    <input type="submit" value="Delete account">
-</form>
-{% if error %}
-    <p>{{ error }}</p>
-{% endif %}
 
 </body>
+
+<style>
+.table {  
+    height: 500px !important;
+    overflow: scroll;
+}
+</style>
+
 </html>
