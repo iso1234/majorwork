@@ -8,7 +8,8 @@
         <div class="col-md-12">
             <!-- Alerts -->
             {% if message %}
-            <div class="{{ 'alert alert-' + message[0].split(":")[0] }}" role="alert">
+            <div class="{{ 'alert alert-' + message[0].split(":")[0] + ' alert-dismissible' }}" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 {{ message[0].split(":")[1] }}
             </div>
             {% endif %}
@@ -27,7 +28,7 @@
                     </thead>
                     
                     <tbody>
-                        {% for i in range(100) %}
+                        {% for i in {"Isaac": "Time1", "Ash": "Time2", "Isaac1": "Time1", "Ash1": "Time2"} %}
                         <tr>
                             <td>First Name</td>
                             <td>Last Name</td>
@@ -44,10 +45,10 @@
                 {% endif %}
             </div>
         </div>
+
         <div class="col-md-4">
-            <h1>Register students</h1>
-            <p>To register a student please enter their email</p>
-            <p>After you click submit the student you entered will be sent a confirmation email</p>
+            <h3>Register students</h3>
+            <p>To register a student please enter their email. After you click submit the student you entered will be sent a confirmation email</p>
             <form action="/mystudents" method="post">
                 <input type="email" placeholder="student email" name="studentEmail" required>
                 <input type="submit" value="Submit">
@@ -55,6 +56,7 @@
 
             <!-- Logout -->
             <form action="/logout" method="post">
+                <p>Logout</p>
                 <input class="btn btn-primary" type="submit" value="Logout">
             </form>
 
