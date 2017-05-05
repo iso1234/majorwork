@@ -282,19 +282,21 @@ def getTimeData(cardID):
         piDBCursor.execute("SELECT time FROM cardTimes WHERE card_id=? ORDER BY time DESC LIMIT 20", (cardID,))
         results = piDBCursor.fetchall()
         piDBConnection.close()
-        return [time.strftime("%a, %d %b %Y %I:%M:%S %p", time.localtime(float(i[0]))) for i in results]
+        return results
     else:
-        return ["time1", "time2", "time3"]
+        return [3521, 5321, 6458]
 
 
 def getStudentInfo(userEmail):
-    """ Returns a dictionary containing the time data for each student associated with the given userEmail (string). 
-        Keys are the names of the students, the value is a list where each element is a piece of time data """
+    """ Returns a list containing the time data for each student associated with the given userEmail (string). 
+        Elements in the list are tuples where the first item in the tuple is the student name and the second is time associated with the student. """
     students = getStudents(userEmail)
-    output = {}
+    output = []
     for studentEmail in students:
-        output[studentEmail] = getTimeData(getStudentCardID(studentEmail))
-    return output
+        for time in getTimeData(getStudentCardID(studentEmail)):
+            output.append((studentEmail, time))
+    output.sort(key=lambda x: x[1])
+    return [(i[0], time.strftime("%a, %d %b %Y %I:%M:%S %p", time.localtime(float(i[1])))) for i in output]
         
         
 def getStudentCardID(studentEmail):

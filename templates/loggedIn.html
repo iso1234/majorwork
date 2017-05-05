@@ -18,7 +18,7 @@
             <!-- Students -->
             <div class="table">
                 <h1>Current students</h1>
-                {% if not studentInfo %}
+                {% if studentInfo %}
                     <table class="table">
                     <thead>
                         <tr>
@@ -28,14 +28,13 @@
                     </thead>
                     
                     <tbody>
-                        {% for i in {"Isaac": "Time1", "Ash": "Time2", "Isaac1": "Time1", "Ash1": "Time2"} %}
+                        {% for entry in studentInfo %}
                         <tr>
-                            <td>First Name</td>
-                            <td>Last Name</td>
+                            <td>{{ entry[0] }}</td>
+                            <td>{{ entry[1] }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
-                    <tbody>
                     </table>
                     <p>{% for name in studentInfo %}{{ name }}</p>
                         <ul>{% for i in studentInfo[name] %}<li>{{i}}</li>{% endfor %}</ul>
@@ -47,29 +46,35 @@
         </div>
 
         <div class="col-md-4">
-            <h3>Register students</h3>
+            <h1>Register students</h1>
             <p>To register a student please enter their email. After you click submit the student you entered will be sent a confirmation email</p>
-            <form action="/mystudents" method="post">
-                <input type="email" placeholder="student email" name="studentEmail" required>
-                <input type="submit" value="Submit">
+            <form action="/mystudents" method="post" class="form-inline">
+                <div class="form-group"> 
+            		<input type="email" class="form-control" name="studentEmail" placeholder="student email" required>
+            	</div>
+                <div class="form-group">
+                    <input class="btn btn-primary form-control" type="submit" value="Submit">
+                </div>
             </form>
-
-            <!-- Logout -->
-            <form action="/logout" method="post">
-                <p>Logout</p>
-                <input class="btn btn-primary" type="submit" value="Logout">
-            </form>
-
-
+            
+            <hr>
+            
             <!-- Delete account -->
             <h1>Delete Account</h1>
-            <p>Enter you email and password below to delete you account</p>
-            <p>After you click the 'delete account' button an email will be sent to the provided email address</p>
-            <p>Please use it to confirm the deletion of you account</p>
+            <p>Enter you email and password below to delete you account.
+                After you click the 'delete account' button an email will be sent to the provided email address.</p>        
             <form action="/deleteAccount" method="post">
-                <input type="email" placeholder="email" name="userEmail" required>
-                <input type="password" placeholder="password" name="userPassword" required>
-                <input class="btn btn-danger" type="submit" value="Delete account">
+                <div class="form-inline">
+                    <fieldset>
+                        <div class="form-group"> 
+                    		<input class="form-control" type="email" placeholder="email" name="userEmail" required>
+                    	</div>
+                        <div class="form-group">
+                            <input class="form-control" type="password" placeholder="password" name="userPassword" required>
+                        </div>
+                    </fieldset>
+                </div>
+                <button id="danger-button" style="margin-right: 25px" type="submit" class="btn btn-danger">Submit</button>
             </form>
             {% if error %}
                 <p>{{ error }}</p>
@@ -81,8 +86,12 @@
 </body>
 
 <style>
+#danger-button {
+    margin-top: 4px;
+    width: 97%;
+}
 .table {  
-    height: 500px !important;
+    max-height: 500px !important;
     overflow: scroll;
 }
 </style>

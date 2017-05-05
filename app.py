@@ -112,7 +112,7 @@ def confirmAccount(key):
     return redirect(url_for("home"))
     
 
-@app.route("/logout", methods=["POST"])
+@app.route("/logout")
 @login_required
 def logout():
     session.pop("userEmail")
