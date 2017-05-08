@@ -1,5 +1,5 @@
-<nav class="navbar navbar-default">
-    <a class="navbar-brand"><img class="img-responsive" width="30px" src="static/LapisIcon.png"/></a>
+<nav class="navbar navbar-default" style="margin-bottom: 5px">
+    <a href="/" class="navbar-brand"><img class="img-responsive" width="30px" src="../static/LapisIcon.png"/></a>
     {% if loginState == True %}
     <form class="navbar-form navbar-right" action="/logout" method="get">
         <button type="submit" class="btn btn-default"  style="margin-right: 10px">Logout</button>
@@ -7,10 +7,7 @@
     {% endif %}
 </nav>
 
-{% if loginState == False %}
-<h1 id="title">LAPIS</h1>
-<p id="note"><small>Year 12 major work by Isaac Greene</small><p>
-{% endif %}
+
 
 
 <style>
@@ -28,30 +25,9 @@
     margin-top: -7.5px !important;
     display: block;
 }
-#title {
-    margin-top: 30px;
-    margin-bottom: 10px;
-    font-size: 70px;
-    display: table;
-    white-space: nowrap;
-    border-spacing: 25px 0;
-}
-#title:before, #title:after {
-  content: "";
-  display: table-cell;
-  width: 50%;
-  background: -webkit-linear-gradient(#aaa, #aaa) repeat-x left center;
-  background: -moz-linear-gradient(#aaa, #aaa) repeat-x left center;
-  background: -ms-linear-gradient(#aaa, #aaa) repeat-x left center;
-  background: linear-gradient(#aaa, #aaa) repeat-x left center;
-  background-size: 1px 1px;
-}
+
 body {
     font-family: sans-serif;
-}
-#note {
-    font-style: italic;
-    text-align: center;
 }
 </style>
 </body>

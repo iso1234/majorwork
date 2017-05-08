@@ -3,6 +3,8 @@
 <body>
 {% include "menubar.html" %}
 
+<h1 id="title">LAPIS</h1>
+<p id="note"><small>Year 12 major work by 30144961</small><p>
 
 <!-- This front end was inspired by code from http://bootsnipp.com/snippets/featured/login-and-register-tabbed-form -->
 
@@ -88,9 +90,19 @@
 .container {
     position: absolute;
     left: 50%;
-    padding-top: 50px;
+    padding-top: 65px;
     -webkit-transform: translate(-50%, 0);
 }
+
+.row {
+    margin-top: 0px;
+}
+
+.alert {
+    margin-top: -65px;
+    margin-bottom: 13px;
+}
+
 .panel-login {
 	border-color: #ccc;
 	-webkit-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
@@ -193,7 +205,28 @@
 	background-color: #1CA347;
 	border-color: #1CA347;
 }
-
+#title {
+    margin-top: 30px;
+    margin-bottom: 10px;
+    font-size: 70px;
+    display: table;
+    white-space: nowrap;
+    border-spacing: 25px 0;
+}
+#title:before, #title:after {
+  content: "";
+  display: table-cell;
+  width: 50%;
+  background: -webkit-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: -moz-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: -ms-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: linear-gradient(#aaa, #aaa) repeat-x left center;
+  background-size: 1px 1px;
+}
+#note {
+    font-style: italic;
+    text-align: center;
+}
 </style>
 
 <script>

@@ -191,7 +191,7 @@ def sendResetPasswordEmail():
 def resetPassword(key=""):
     if request.method == "GET":
         if key in sqlAPI.keysInPendingPasswordResets():
-            return renderTemplate("resetpassword.html", {"key": key, "message": get_flashed_messages()})
+            return renderTemplate("resetPassword.html", {"key": key, "message": get_flashed_messages(), "loginState": loginState()})
         else:
             flash("danger:Oops! This password has already been reset or the associated account has been deleted.")
             return redirect(url_for("home"))

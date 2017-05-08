@@ -8,7 +8,7 @@
         <div class="col-md-12">
             <!-- Alerts -->
             {% if message %}
-            <div class="{{ 'alert alert-' + message[0].split(":")[0] + ' alert-dismissible' }}" role="alert">
+            <div class="{{ 'alert alert-' + message[0].split(":")[0] + ' alert-dismissible' }}" role="alert" style="margin-bottom: -10px; margin-top: 5px">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 {{ message[0].split(":")[1] }}
             </div>
