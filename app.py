@@ -244,6 +244,9 @@ def confirmDeleteAccount(key):
         flash("danger:Oops! This account has already been deleted.")
     return redirect(url_for("home"))
         
+@app.errorhandler(404)
+def err(e):
+    return renderTemplate("error.html", {})
 
 if __name__ == "__main__":
     app.run(host=IP)
