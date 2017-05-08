@@ -233,7 +233,6 @@ def userInDB(userEmail, userPassword):
     False (bool) = that set of data wasn't found """
     cursor.execute("SELECT * FROM users WHERE user_email=?", (userEmail,))
     results = cursor.fetchall()
-    print(results)
     if results:
         return check_password_hash(results[0][1], userPassword)
     else:
