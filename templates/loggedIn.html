@@ -1,5 +1,3 @@
-{% if not reqxhr %}
-
 {% include "header.html" %}
 
 <body>
@@ -16,9 +14,8 @@
             </div>
             {% endif %}
         </div>
-        <div class="col-md-8" id="currentStudents">
+        <div class="col-md-8">
             <!-- Students -->
-            {% endif %}
             <div class="table">
                 <h1>Current students</h1>
                 {% if studentInfo %}
@@ -46,7 +43,6 @@
                     <p>No Students have been registered</p>
                 {% endif %}
             </div>
-            {% if not reqxhr %}
         </div>
 
         <div class="col-md-4">
@@ -100,17 +96,4 @@
 }
 </style>
 
-<script>
-var getUsers = function() {
-    $.get('/ajax_user', function(data) {
-        $('#currentStudents').html(data)
-    })
-}
-
-setInterval(function() {
-    getUsers()
-}, 5000)
-</script>
-
 </html>
-{% endif %}

@@ -49,17 +49,11 @@ def logged_out_required(f):
 def home():
     if loginState():
         # Logged in
-        return renderTemplate("loggedIn.html", {"message": get_flashed_messages(), "loginState": loginState(), "studentInfo": sqlAPI.getStudentInfo(session["userEmail"]), "reqxhr": request.is_xhr})
+        return renderTemplate("loggedIn.html", {"message": get_flashed_messages(), "loginState": loginState(), "studentInfo": sqlAPI.getStudentInfo(session["userEmail"])})
     else:
         # Logged out
-        return renderTemplate("loggedOut.html", {"message": get_flashed_messages(), "loginState": loginState(), "reqxhr": request.is_xhr})
+        return renderTemplate("loggedOut.html", {"message": get_flashed_messages(), "loginState": loginState()})
     
-@app.route("/ajax_user", methods=['GET'])
-def ajax_users():
-    if request.is_xhr:
-        return renderTemplate("loggedIn.html", {"studentInfo": sqlAPI.getStudentInfo(session["userEmail"]), "reqxhr": request.is_xhr})
-    else:
-        return redirect("/")
 
 @app.route("/login", methods=["POST"])
 @logged_out_required
@@ -152,6 +146,7 @@ def mystudents():
         # Already registered
         flash("danger:Oops! You've already registered the student '{}'.".format(studentEmail))
     return redirect(url_for("home"))
+
 
 @app.route("/confirmStudentRequest/<key>")
 def confirmStudentRequest(key):
@@ -249,18 +244,6 @@ def confirmDeleteAccount(key):
         flash("danger:Oops! This account has already been deleted.")
     return redirect(url_for("home"))
         
-@app.errorhandler(400)
-@app.errorhandler(401)
-@app.errorhandler(403)
-@app.errorhandler(404)
-@app.errorhandler(405)
-@app.errorhandler(500)
-@app.errorhandler(501)
-@app.errorhandler(502)
-@app.errorhandler(503)
-@app.errorhandler(504)
-def error(e):
-    return renderTemplate("error.html", {"description": e.description, "code": e.code}), e.code
 
 if __name__ == "__main__":
     app.run(host=IP)
