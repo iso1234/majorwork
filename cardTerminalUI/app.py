@@ -39,19 +39,6 @@ def getData():
                 t.sleep(2.0)
     return Response(gen(), mimetype="text/event-stream")
 
-@app.route("/exit")
-def exit():
-    return render_template("exit.html")
-
-@app.route("/shutdown")
-def shutdown():
-    connection.close()
-    # Shutdown
-    command = "/usr/bin/sudo /sbin/shutdown now"
-    import subprocess
-    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-    return "Exiting now"
-
 
 if __name__ == "__main__":
     app.run()
