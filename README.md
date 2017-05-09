@@ -8,7 +8,7 @@ My year 12 software design and development major work
     > Go to 'http://localhost:5000' in your internet browser.
 
 
-### Dependencies
+### Dependencies for the website
 * Flask (0.12)
 * Python (3.5.0)
 * Sqlite (3.8.10.2)
