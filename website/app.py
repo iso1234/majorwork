@@ -9,10 +9,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key="v\xf1\xb5\tr\xe2\xb3\x14!g"
 
-IP = "127.0.0.1"
-PORT = "5000"
-ADDRESS = IP + ":" + PORT
-
 def loginState():
     """ Returns True if the user is logged in, otherwise it returns false """
     if 'userEmail' in session:
@@ -249,4 +245,4 @@ def err(e):
     return renderTemplate("error.html", {})
 
 if __name__ == "__main__":
-    app.run(host=IP)
+    app.run(host="127.0.0.1", port=5000)
