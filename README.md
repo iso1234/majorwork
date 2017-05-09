@@ -2,7 +2,7 @@
 My year 12 software design and development major work
 
 ### How to run the server
-    > Open a terminal window in /majorwork
+    > Open a terminal window in /majorwork/website
     > Run the following command command (without the '$')
     $ python3.6 app.py
     > Go to 'http://localhost:5000' in your internet browser.
@@ -10,12 +10,12 @@ My year 12 software design and development major work
 
 ### Dependencies
 * Flask (0.12)
-* Python (3.6.0)
+* Python (3.5.0)
 * Sqlite (3.8.10.2)
 
 
-### How to create database:        
-    1. Open a python3 shell in /majorwork
+### How to create the database:        
+    1. Open a python3 shell in /majorwork/website
     2. Input the following commands in the python3 shell (without the '>>>')
     >>> import configDB
     >>> configDB.createDB()
