@@ -1,7 +1,7 @@
 # The API that will be used to interface with the database
 import sqlite3
 import os
-import time
+from time import strftime, localtime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 connection = sqlite3.connect("main.db", check_same_thread=False)
@@ -283,7 +283,7 @@ def getTimeData(cardID):
         piDBConnection.close()
         return results
     else:
-        return [3521, 5321, 6458]
+        return []
 
 
 def getStudentInfo(userEmail):
@@ -292,10 +292,10 @@ def getStudentInfo(userEmail):
     students = getStudents(userEmail)
     output = []
     for studentEmail in students:
-        for time in getTimeData(getStudentCardID(studentEmail)):
-            output.append((studentEmail, time))
+        for t in getTimeData(getStudentCardID(studentEmail)):
+            output.append((studentEmail, t))
     output.sort(key=lambda x: x[1])
-    return [(i[0], time.strftime("%a, %d %b %Y %I:%M:%S %p", time.localtime(float(i[1])))) for i in output]
+    return [(i[0], strftime("%a, %d %b %Y %I:%M:%S %p", localtime(float(i[1][0])))) for i in output]
         
         
 def getStudentCardID(studentEmail):

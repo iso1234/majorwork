@@ -36,9 +36,6 @@
                         {% endfor %}
                     </tbody>
                     </table>
-                    <p>{% for name in studentInfo %}{{ name }}</p>
-                        <ul>{% for i in studentInfo[name] %}<li>{{i}}</li>{% endfor %}</ul>
-                    {% endfor %}
                 {% else %}
                     <p>No Students have been registered</p>
                 {% endif %}
