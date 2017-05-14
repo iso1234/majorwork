@@ -28,7 +28,7 @@
                     </thead>
                     
                     <tbody>
-                        {% for entry in studentInfo %}
+                        {% for entry in studentInfo[::-1] %}
                         <tr>
                             <td>{{ entry[0] }}</td>
                             <td>{{ entry[1] }}</td>

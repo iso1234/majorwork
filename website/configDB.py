@@ -4,7 +4,7 @@ import sqlite3
 def createDB():
     """ If the database 'main.db' doesn't already exist, create it. """
     if os.path.exists("main.db"):
-        print("The database 'main.db' already exists.")
+        return("The database 'main.db' already exists.")
     else:
         conn = sqlite3.connect("main.db")
         cur = conn.cursor()
@@ -45,4 +45,4 @@ def createDB():
         cur.execute("INSERT INTO studentCardIDs (student_email, card_id) VALUES ('lynchluke@inaburrastudents.nsw.edu.au', '0C9D413E')")
         conn.commit()
         conn.close()
-        print("Database created")
+        return("Database created")
