@@ -35,7 +35,11 @@ def getData():
                 # SQL
                 cursor.execute("INSERT INTO cardTimes (card_id, time) VALUES (?, ?)", (cardId, time))
                 connection.commit()
-                yield("data: {}\n\n".format(str(studentCardIDs[cardId])))
+                if cardId in studentCardIDs:
+                    output = str(studentCardIDs[cardId])
+                else:
+                    output = "unknown student"
+                yield("data: {}\n\n".format(output)
                 t.sleep(2.0)
     return Response(gen(), mimetype="text/event-stream")
 
