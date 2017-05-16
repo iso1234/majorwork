@@ -247,4 +247,4 @@ def err(e):
     return renderTemplate("error.html", {})
 
 if __name__ == "__main__":
-    app.run(host=ADDRESS, port=5000)
+    app.run(host=ADDRESS, port=80)
