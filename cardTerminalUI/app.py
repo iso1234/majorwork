@@ -39,7 +39,7 @@ def getData():
                     output = str(studentCardIDs[cardId])
                 else:
                     output = "unknown student"
-                yield("data: {}\n\n".format(output)
+                yield("data: {}\n\n".format(output))
                 t.sleep(2.0)
     return Response(gen(), mimetype="text/event-stream")
 
