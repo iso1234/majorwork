@@ -1,0 +1,97 @@
+{% include "header.html" %}
+
+<body>
+{% include "menubar.html" %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Alerts -->
+            {% if message %}
+            <div class="{{ 'alert alert-' + message[0].split(":")[0] + ' alert-dismissible' }}" role="alert" style="margin-bottom: -10px; margin-top: 5px">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                {{ message[0].split(":")[1] }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <!-- Students -->
+            <div class="table">
+                <h1>Current students</h1>
+                {% if studentInfo %}
+                    <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                        {% for entry in studentInfo[::-1] %}
+                        <tr>
+                            <td>{{ entry[0] }}</td>
+                            <td>{{ entry[1] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                {% else %}
+                    <p>No Students have been registered.</p>
+                    <p>To register a student enter their student email into the text field on the right hand side of the page and click submit</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <h1>Register students</h1>
+            <p>To register a student please enter their email. After you click submit the student you entered will be sent a confirmation email</p>
+            <form action="/mystudents" method="post" class="form-inline">
+                <div class="form-group"> 
+            		<input type="email" class="form-control" name="studentEmail" placeholder="student email" required>
+            	</div>
+                <div class="form-group">
+                    <input class="btn btn-primary form-control" type="submit" value="Submit">
+                </div>
+            </form>
+            
+            <hr>
+            
+            <!-- Delete account -->
+            <h1>Delete Account</h1>
+            <p>Enter you email and password below to delete you account.
+                After you click the 'delete account' button an email will be sent to the provided email address.</p>        
+            <form action="/deleteAccount" method="post">
+                <div class="form-inline">
+                    <fieldset>
+                        <div class="form-group"> 
+                    		<input class="form-control" type="email" placeholder="email" name="userEmail" required>
+                    	</div>
+                        <div class="form-group">
+                            <input class="form-control" type="password" placeholder="password" name="userPassword" required>
+                        </div>
+                    </fieldset>
+                </div>
+                <button id="danger-button" style="margin-right: 25px" type="submit" class="btn btn-danger">Submit</button>
+            </form>
+            {% if error %}
+                <p>{{ error }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+</body>
+
+<style>
+#danger-button {
+    margin-top: 4px;
+    width: 97%;
+}
+.table {  
+    max-height: 500px !important;
+    overflow: scroll;
+}
+</style>
+
+</html>

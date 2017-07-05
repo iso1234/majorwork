@@ -1,0 +1,34 @@
+<nav class="navbar navbar-default" style="margin-bottom: 5px">
+    <a href="/" class="navbar-brand"><img class="img-responsive" width="30px" src="../static/LapisIcon.png"/></a>
+    {% if loginState == True %}
+    <form class="navbar-form navbar-right" action="/logout" method="get">
+        <button type="submit" class="btn btn-default"  style="margin-right: 10px">Logout</button>
+    </form>
+    {% endif %}
+</nav>
+
+
+
+
+<style>
+.navbar {
+    border-top: 3px solid #03A9F4;
+    border-radius: 0px;
+}
+.navbar {
+    position: relative;
+}
+.navbar-brand {
+    position: absolute;
+    up: 50%;
+    left: -6px;
+    margin-top: -7.5px !important;
+    display: block;
+}
+
+body {
+    font-family: sans-serif;
+}
+</style>
+</body>
+</html>

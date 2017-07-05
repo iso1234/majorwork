@@ -1,0 +1,257 @@
+{% include "header.html" %}
+
+<body>
+{% include "menubar.html" %}
+
+<h1 id="title">LAPIS</h1>
+<p id="note"><small>Year 12 major work by 30144961</small><p>
+
+<!-- This front end was inspired by code from http://bootsnipp.com/snippets/featured/login-and-register-tabbed-form -->
+
+<div class="container">
+    	<div class="row">
+			<div class="col-md-6 col-md-offset-3">
+                <!-- Alerts -->
+                {% if message %}
+                <div class="{{ 'alert alert-' + message[0].split(":")[0] + ' alert-dismissible' }}" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    {{ message[0].split(":")[1] }}
+                </div>
+                {% endif %}
+				<div class="panel panel-login">
+					<div class="panel-heading">
+						<div class="row">
+							<div class="col-xs-6" style="border-right: 1px solid #BDBDBD">
+								<a href="#" class="active" id="login-form-link">Login</a>
+							</div>
+							<div class="col-xs-6">
+								<a href="#" id="register-form-link">Register</a>
+							</div>
+						</div>
+						<hr>
+					</div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<form id="login-form" action="/login" method="post" role="form" style="display: block;">
+									<div class="form-group">
+										<input type="email" name="userEmail" id="username" tabindex="1" class="form-control" placeholder="Email" value="" required>
+									</div>
+									<div class="form-group">
+										<input type="password" name="userPassword" id="password" tabindex="2" class="form-control" placeholder="Password" required>
+									</div>
+									<div class="form-group">
+										<div class="row">
+											<div class="col-sm-6 col-sm-offset-3">
+												<input type="submit" name="login-submit" id="login-submit" tabindex="3" class="form-control btn btn-login" value="Log In">
+											</div>
+										</div>
+									</div>
+								</form>
+                                <div class="form-group" id="reset-password">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <p>Forgot or want to reset your password? Enter your email below</p>
+                                            <form action="/sendResetPasswordEmail" method="post" class="password-reset form-inline">
+                                                <input type="email" name="userEmail" tabindex="4" class="form-control col-sm-10" placeholder="Email" value="" required>
+                                                <input type="submit" tabindex="5" value="Submit" class="btn btn-default btn-sm pull-right col-sm10-2">
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+								<form id="register-form" action="/signup" method="post" role="form" style="display: none;">
+									<div class="form-group">
+										<input type="email" name="signupEmail" id="username" tabindex="1" class="form-control" placeholder="Email" value="" required>
+									</div>
+									<div class="form-group">
+										<input type="password" name="signupPassword" id="password" tabindex="2" class="form-control" placeholder="Password" required>
+									</div>
+									<div class="form-group">
+										<input type="password" name="signupRepeatPassword" id="confirm-password" tabindex="2" class="form-control" placeholder="Confirm Password" required>
+									</div>
+									<div class="form-group">
+										<div class="row">
+											<div class="col-sm-6 col-sm-offset-3">
+												<input type="submit" name="register-submit" id="register-submit" tabindex="4" class="form-control btn btn-register" value="Register Now">
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+    
+<style>
+.container {
+    position: absolute;
+    left: 50%;
+    padding-top: 65px;
+    -webkit-transform: translate(-50%, 0);
+}
+
+.row {
+    margin-top: 0px;
+}
+
+.alert {
+    margin-top: -65px;
+    margin-bottom: 13px;
+}
+
+.panel-login {
+	border-color: #ccc;
+	-webkit-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
+	box-shadow: 0px 2px 3px 0px rgba(0,0,0,0.2);
+}
+.panel-login>.panel-heading {
+	color: #00415d;
+	background-color: #fff;
+	border-color: #fff;
+	text-align:center;
+}
+.panel-login>.panel-heading a{
+	text-decoration: none;
+	color: #BDBDBD;
+	font-weight: bold;
+	font-size: 15px;
+	-webkit-transition: all 0.1s linear;
+	-moz-transition: all 0.1s linear;
+	transition: all 0.1s linear;
+}
+.panel-login>.panel-heading a.active{
+	color: #424242;
+	font-size: 18px;
+}
+.panel-login>.panel-heading hr{
+	margin-top: 10px;
+	margin-bottom: 0px;
+	clear: both;
+	border: 0;
+	height: 1px;
+	background-image: -webkit-linear-gradient(left,rgba(0, 0, 0, 0),rgba(0, 0, 0, 0.15),rgba(0, 0, 0, 0));
+	background-image: -moz-linear-gradient(left,rgba(0,0,0,0),rgba(0,0,0,0.15),rgba(0,0,0,0));
+	background-image: -ms-linear-gradient(left,rgba(0,0,0,0),rgba(0,0,0,0.15),rgba(0,0,0,0));
+	background-image: -o-linear-gradient(left,rgba(0,0,0,0),rgba(0,0,0,0.15),rgba(0,0,0,0));
+}
+.panel-login input[type="text"],.panel-login input[type="email"],.panel-login input[type="password"] {
+	height: 45px;
+	border: 1px solid #ddd;
+	font-size: 16px;
+	-webkit-transition: all 0.1s linear;
+	-moz-transition: all 0.1s linear;
+	transition: all 0.1s linear;
+}
+.password-reset input:not([type='submit']) {
+    height: 30px;
+    width: calc(100% * 10/12);
+}.password-reset input[type='submit'] {
+    width: calc(100% - calc(100% * 10/12));
+}
+.panel-login input:hover,
+.panel-login input:focus {
+	outline:none;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+	border-color: #ccc;
+}
+.btn-login {
+	background-color: #59B2E0;
+	outline: none;
+	color: #fff;
+	font-size: 14px;
+	height: auto;
+	font-weight: normal;
+	padding: 14px 0;
+	text-transform: uppercase;
+	border-color: #59B2E6;
+}
+.btn-login:hover,
+.btn-login:focus {
+	color: #fff;
+	background-color: #53A3CD;
+	border-color: #53A3CD;
+}
+.forgot-password {
+	text-decoration: underline;
+	color: #888;
+}
+.forgot-password:hover,
+.forgot-password:focus {
+	text-decoration: underline;
+	color: #666;
+}
+
+.btn-register {
+	background-color: #1CB94E;
+	outline: none;
+	color: #fff;
+	font-size: 14px;
+	height: auto;
+	font-weight: normal;
+	padding: 14px 0;
+	text-transform: uppercase;
+	border-color: #1CB94A;
+}
+.btn-register:hover,
+.btn-register:focus {
+	color: #fff;
+	background-color: #1CA347;
+	border-color: #1CA347;
+}
+#title {
+    margin-top: 30px;
+    margin-bottom: 10px;
+    font-size: 70px;
+    display: table;
+    white-space: nowrap;
+    border-spacing: 25px 0;
+}
+#title:before, #title:after {
+  content: "";
+  display: table-cell;
+  width: 50%;
+  background: -webkit-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: -moz-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: -ms-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: linear-gradient(#aaa, #aaa) repeat-x left center;
+  background-size: 1px 1px;
+}
+#note {
+    font-style: italic;
+    text-align: center;
+}
+</style>
+
+<script>
+$(function() {
+
+    $('#login-form-link').click(function(e) {
+		$("#login-form").delay(100).fadeIn(100);
+        $("#reset-password").delay(100).fadeIn(100);
+ 		$("#register-form").fadeOut(100);
+		$('#register-form-link').removeClass('active');
+		$(this).addClass('active');
+		e.preventDefault();
+	});
+	$('#register-form-link').click(function(e) {
+		$("#register-form").delay(100).fadeIn(100);
+ 		$("#login-form").fadeOut(100);
+        $("#reset-password").fadeOut(100);
+		$('#login-form-link').removeClass('active');
+		$(this).addClass('active');
+		e.preventDefault();
+	});
+
+});
+
+</script>
+
+</body>
+</html>

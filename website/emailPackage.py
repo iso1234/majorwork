@@ -19,8 +19,7 @@ def sendEmail(toAddrs, user_email, key, emailType, ADDRESS):
         msgHead = "From: {}\r\nTo: {}\r\nSubject: Request from user to access your information\r\n".format(FROMADDRS, toAddrs)
         msgBody = [
                 "Hello,",
-                "'{}' has requested that they have access to your arrival and departure times at after school study recorded by lapis".format(user_email),
-                "\n",
+                "\n'{}' has requested that they have access to your arrival and departure times at after school study recorded by lapis".format(user_email),
                 "Visit the link below to accept this",
                 ADDRESS + "/confirmStudentRequest/{}".format(key)
         ]
@@ -29,22 +28,21 @@ def sendEmail(toAddrs, user_email, key, emailType, ADDRESS):
         msgBody = [
                 "Hello,",
                 "Thanks for signing up with lapis!",
-                "\n",
-                "Visit the link below to confirm your account",
+                "\nVisit the link below to confirm your account",
                 ADDRESS + "/confirmAccount/{}".format(key)
         ]
     elif emailType == "r": # Password reset
         msgHead = "From: {}\r\nTo: {}\r\nSubject: Reset password\r\n".format(FROMADDRS, toAddrs)
         msgBody = [
                 "Hello,",
-                "Visit the link below to reset your password",
+                "\nVisit the link below to reset your password",
                 ADDRESS + "/resetPassword/{}".format(key)
         ]
     elif emailType == "d": # Account deletion
         msgHead = "From: {}\r\nTo: {}\r\nSubject: Delete my account\r\n".format(FROMADDRS, toAddrs)
         msgBody = [
                 "Hello,",
-                "Visit the link below to delete your account",
+                "\nVisit the link below to delete your account",
                 ADDRESS + "/confirmDeleteAccount/{}".format(key)
         ]
     else:

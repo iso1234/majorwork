@@ -1,7 +1,8 @@
 # The API that will be used to interface with the database
 import sqlite3
 import os
-import time
+from time import strftime, localtime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 connection = sqlite3.connect("main.db", check_same_thread=False)
 cursor = connection.cursor()
@@ -105,6 +106,12 @@ def keysInPendingPasswordResets():
     cursor.execute("SELECT * FROM pendingPasswordResets")
     results = cursor.fetchall()
     return [i[1] for i in results]
+    
+
+def deletePendingPasswordReset(userEmail):
+    """ Deletes any pending password resets associated with the provided userEmail """
+    cursor.execute("DELETE FROM pendingPasswordResets WHERE user_email=?", (userEmail,))
+    connection.commit()
 
 
 ##==================================================================================================================##
@@ -224,10 +231,10 @@ def userInDB(userEmail, userPassword):
     Output:
     True (bool) = that set of data was found
     False (bool) = that set of data wasn't found """
-    cursor.execute("SELECT * FROM users WHERE user_email=? AND user_password=?", (userEmail, userPassword))
+    cursor.execute("SELECT * FROM users WHERE user_email=?", (userEmail,))
     results = cursor.fetchall()
     if results:
-        return True
+        return check_password_hash(results[0][1], userPassword)
     else:
         return False
 
@@ -274,19 +281,21 @@ def getTimeData(cardID):
         piDBCursor.execute("SELECT time FROM cardTimes WHERE card_id=? ORDER BY time DESC LIMIT 20", (cardID,))
         results = piDBCursor.fetchall()
         piDBConnection.close()
-        return [time.strftime("%a, %d %b %Y %I:%M:%S %p", time.localtime(float(i[0]))) for i in results]
+        return results
     else:
-        return ["time1", "time2", "time3"]
+        return []
 
 
 def getStudentInfo(userEmail):
-    """ Returns a dictionary containing the time data for each student associated with the given userEmail (string). 
-        Keys are the names of the students, the value is a list where each element is a piece of time data """
+    """ Returns a list containing the time data for each student associated with the given userEmail (string). 
+        Elements in the list are tuples where the first item in the tuple is the student name and the second is time associated with the student. """
     students = getStudents(userEmail)
-    output = {}
+    output = []
     for studentEmail in students:
-        output[studentEmail] = getTimeData(getStudentCardID(studentEmail))
-    return output
+        for t in getTimeData(getStudentCardID(studentEmail)):
+            output.append((studentEmail, t))
+    output.sort(key=lambda x: x[1])
+    return [(i[0], strftime("%a, %d %b %Y %I:%M:%S %p", localtime(float(i[1][0])))) for i in output]
         
         
 def getStudentCardID(studentEmail):
